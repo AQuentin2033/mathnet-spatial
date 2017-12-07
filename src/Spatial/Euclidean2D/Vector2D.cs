@@ -1,17 +1,32 @@
-﻿namespace MathNet.Spatial.Euclidean2D
+﻿namespace MathNet.Spatial.Euclidean
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Globalization;
-    using System.Numerics;
-    using MathNet.Spatial;
+    using System.Linq;
+    using System.Xml;
+    using System.Xml.Schema;
+    using System.Xml.Serialization;
+    using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Internals;
+    using MathNet.Spatial.Units;
 
     /// <summary>
     /// A struct representing a vector in 2D space
     /// </summary>
-    public struct Vector2D : IEquatable<Vector2D>
+    [Serializable]
+    public struct Vector2D : IXmlSerializable, IEquatable<Vector2D>, IFormattable
     {
-        private Vector<double> v;
+        /// <summary>
+        /// The x component.
+        /// </summary>
+        public readonly double X;
+
+        /// <summary>
+        /// The y component.
+        /// </summary>
+        public readonly double Y;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector2D"/> struct.
@@ -20,37 +35,66 @@
         /// <param name="y">The y component.</param>
         public Vector2D(double x, double y)
         {
-            this.v = new Vector<double>(new double[] { x, y });
+            this.X = x;
+            this.Y = y;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector2D"/> struct.
+        /// Creates a vector with length r rotated a counterclockwise from X-Axis
+        /// </summary>
+        /// <param name="r">The radius</param>
+        /// <param name="a">The angle</param>
+        [Obsolete("This constructor will be removed, use FromPolar. Made obsolete 2017-12-03.")]
+        //// ReSharper disable once UnusedMember.Global
+        public Vector2D(double r, Angle a)
+            : this(r * Math.Cos(a.Radians), r * Math.Sin(a.Radians))
+        {
+            if (r < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(r), r, "Expected a radius greater than or equal to zero.");
+            }
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector2D"/> struct.
         /// </summary>
-        /// <param name="vector">An existing vector</param>
-        private Vector2D(Vector<double> vector)
+        /// <param name="data">A list of 2 doubles</param>
+        [Obsolete("This constructor will be removed. Made obsolete 2017-12-03.")]
+        //// ReSharper disable once UnusedMember.Global
+        public Vector2D(IEnumerable<double> data)
+            : this(data.ToArray())
         {
-            this.v = vector;
         }
 
         /// <summary>
-        /// Gets the x component.
+        /// Initializes a new instance of the <see cref="Vector2D"/> struct.
         /// </summary>
-        public double X
+        /// <param name="data">A list of 2 doubles</param>
+        [Obsolete("This constructor will be removed. Made obsolete 2017-12-03.")]
+        public Vector2D(double[] data)
+            : this(data[0], data[1])
         {
-            get => this.v[0];
+            if (data.Length != 2)
+            {
+                throw new ArgumentException("data.Length != 2!");
+            }
         }
 
         /// <summary>
-        /// Gets the y component.
+        /// Gets a vector representing the X Axis
         /// </summary>
-        public double Y
-        {
-            get => this.v[1];
-        }
+        public static Vector2D XAxis { get; } = new Vector2D(1, 0);
+
+        /// <summary>
+        /// Gets a vector representing the Y Axis
+        /// </summary>
+        public static Vector2D YAxis { get; } = new Vector2D(0, 1);
 
         /// <summary>
         /// Gets the length of the vector
         /// </summary>
+        [Pure]
         public double Length => Math.Sqrt((this.X * this.X) + (this.Y * this.Y));
 
         /// <summary>
@@ -115,7 +159,7 @@
         /// <returns>A scaled vector</returns>
         public static Vector2D operator *(double d, Vector2D v)
         {
-            return new Vector2D(v.v * d);
+            return new Vector2D(d * v.X, d * v.Y);
         }
 
         /// <summary>
@@ -126,7 +170,7 @@
         /// <returns>A scaled vector</returns>
         public static Vector2D operator *(Vector2D v, double d)
         {
-            return new Vector2D(v.v * d);
+            return d * v;
         }
 
         /// <summary>
@@ -205,6 +249,32 @@
         }
 
         /// <summary>
+        /// Creates an <see cref="Vector2D"/> from an <see cref="XmlReader"/>.
+        /// </summary>
+        /// <param name="reader">An <see cref="XmlReader"/> positioned at the node to read into this <see cref="Vector2D"/>.</param>
+        /// <returns>An <see cref="Vector2D"/> that contains the data read from the reader.</returns>
+        public static Vector2D ReadFrom(XmlReader reader)
+        {
+            return reader.ReadElementAs<Vector2D>();
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Vector2D"/> from a Math.NET Numerics vector of length 2.
+        /// </summary>
+        /// <param name="vector"> A vector with length 2 to populate the created instance with.</param>
+        /// <returns> A <see cref="Vector2D"/></returns>
+        [Pure]
+        public static Vector2D OfVector(Vector<double> vector)
+        {
+            if (vector.Count != 2)
+            {
+                throw new ArgumentException("The vector length must be 2 in order to convert it to a Vector2D");
+            }
+
+            return new Vector2D(vector.At(0), vector.At(1));
+        }
+
+        /// <summary>
         /// Computes whether or not this vector is perpendicular to <paramref name="other"/> vector by:
         /// 1. Normalizing both
         /// 2. Computing the dot product.
@@ -213,6 +283,7 @@
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <param name="tolerance">The tolerance for when vectors are said to be parallel</param>
         /// <returns>True if the vector dot product is within the given double tolerance of unity, false if not</returns>
+        [Pure]
         public bool IsParallelTo(Vector2D other, double tolerance = 1e-10)
         {
             var dp = Math.Abs(this.Normalize().DotProduct(other.Normalize()));
@@ -225,6 +296,7 @@
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <param name="tolerance">The tolerance for when vectors are said to be parallel</param>
         /// <returns>True if the vectors are parallel within the angle tolerance, false if they are not</returns>
+        [Pure]
         public bool IsParallelTo(Vector2D other, Angle tolerance)
         {
             // Compute the angle between these vectors
@@ -247,6 +319,7 @@
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <param name="tolerance">The tolerance for when vectors are said to be parallel</param>
         /// <returns>True if the vector dot product is within the given double tolerance of unity, false if not</returns>
+        [Pure]
         public bool IsPerpendicularTo(Vector2D other, double tolerance = 1e-10)
         {
             return Math.Abs(this.Normalize().DotProduct(other.Normalize())) < tolerance;
@@ -258,6 +331,7 @@
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <param name="tolerance">The tolerance for when vectors are said to be parallel</param>
         /// <returns>True if the vectors are parallel within the angle tolerance, false if they are not</returns>
+        [Pure]
         public bool IsPerpendicularTo(Vector2D other, Angle tolerance)
         {
             var angle = this.AngleTo(other);
@@ -272,6 +346,7 @@
         /// <param name="clockWise">Positive in clockwise direction</param>
         /// <param name="returnNegative">When true and the result is > 180° a negative value is returned</param>
         /// <returns>The angle between the vectors.</returns>
+        [Pure]
         public Angle SignedAngleTo(Vector2D other, bool clockWise = false, bool returnNegative = false)
         {
             var sign = clockWise ? -1 : 1;
@@ -306,6 +381,7 @@
         /// </summary>
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <returns>The angle between vectors, with a range between 0° and 180°</returns>
+        [Pure]
         public Angle AngleTo(Vector2D other)
         {
             return Angle.FromRadians(
@@ -316,10 +392,26 @@
         }
 
         /// <summary>
+        /// Rotates a Vector
+        /// </summary>
+        /// <typeparam name="T">An Angleunit</typeparam>
+        /// <param name="angle">An angle</param>
+        /// <param name="angleUnit">A type of angle</param>
+        /// <returns>A new vector</returns>
+        [Obsolete("This method will be removed, use the overload that takes an Angle. Made obsolete 2017-12-03.")]
+        //// ReSharper disable once UnusedMember.Global
+        public Vector2D Rotate<T>(double angle, T angleUnit)
+            where T : IAngleUnit
+        {
+            return this.Rotate(Angle.From(angle, angleUnit));
+        }
+
+        /// <summary>
         /// Rotates a Vector by an angle
         /// </summary>
         /// <param name="angle">The angle.</param>
         /// <returns>A new rotated vector.</returns>
+        [Pure]
         public Vector2D Rotate(Angle angle)
         {
             var cs = Math.Cos(angle.Radians);
@@ -334,6 +426,7 @@
         /// </summary>
         /// <param name="other">The second vector</param>
         /// <returns>The result of the dot product.</returns>
+        [Pure]
         public double DotProduct(Vector2D other)
         {
             return (this.X * other.X) + (this.Y * other.Y);
@@ -346,6 +439,7 @@
         /// </summary>
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <returns>(this.X * other.Y) - (this.Y * other.X)</returns>
+        [Pure]
         public double CrossProduct(Vector2D other)
         {
             // Though the cross product is undefined in 2D space, this is a useful mathematical operation to
@@ -358,6 +452,7 @@
         /// </summary>
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <returns>A <see cref="Vector2D"/> representing this vector projected on <paramref name="other"/></returns>
+        [Pure]
         public Vector2D ProjectOn(Vector2D other)
         {
             return other * (this.DotProduct(other) / other.DotProduct(other));
@@ -367,6 +462,7 @@
         /// Creates a new unit vector from the existing vector.
         /// </summary>
         /// <returns>A new unit vector in the same direction as the original vector</returns>
+        [Pure]
         public Vector2D Normalize()
         {
             var l = this.Length;
@@ -378,18 +474,20 @@
         /// </summary>
         /// <param name="d">a scaling factor</param>
         /// <returns>A new scale adjusted vector</returns>
+        [Pure]
         public Vector2D ScaleBy(double d)
         {
-            return new Vector2D(this.v * d);
+            return new Vector2D(d * this.X, d * this.Y);
         }
 
         /// <summary>
         /// Returns the negative of the vector
         /// </summary>
         /// <returns>A new negated vector.</returns>
+        [Pure]
         public Vector2D Negate()
         {
-            return new Vector2D(-this.v);
+            return new Vector2D(-1 * this.X, -1 * this.Y);
         }
 
         /// <summary>
@@ -397,9 +495,10 @@
         /// </summary>
         /// <param name="v">A vector to subtract</param>
         /// <returns>A new vector which is the difference of the current vector and the provided vector</returns>
+        [Pure]
         public Vector2D Subtract(Vector2D v)
         {
-            return new Vector2D(this.v - v.v);
+            return new Vector2D(this.X - v.X, this.Y - v.Y);
         }
 
         /// <summary>
@@ -407,15 +506,41 @@
         /// </summary>
         /// <param name="v">A vector to add</param>
         /// <returns>A new vector which is the sum of the existing vector and the provided vector</returns>
+        [Pure]
         public Vector2D Add(Vector2D v)
         {
-            return new Vector2D(this.v + v.v);
+            return new Vector2D(this.X + v.X, this.Y + v.Y);
+        }
+
+        /// <summary>
+        /// Transforms a vector by multipying it against a provided patrix
+        /// </summary>
+        /// <param name="m">The matrix to multiply</param>
+        /// <returns>A new transformed vector</returns>
+        [Pure]
+        public Vector2D TransformBy(Matrix<double> m)
+        {
+            var transformed = m.Multiply(this.ToVector());
+            return new Vector2D(transformed.At(0), transformed.At(1));
+        }
+
+        /// <summary>
+        /// Convert to a Math.NET Numerics dense vector of length 2.
+        /// </summary>
+        /// <returns> A <see cref="Vector{Double}"/> with the x and y values from this instance.</returns>
+        [Pure]
+        public Vector<double> ToVector()
+        {
+            return Vector<double>.Build.Dense(new[] { this.X, this.Y });
         }
 
         /// <inheritdoc />
+        [Pure]
         public bool Equals(Vector2D other)
         {
-            return this.v == other.v;
+            //// ReSharper disable CompareOfFloatsByEqualityOperator
+            return this.X == other.X && this.Y == other.Y;
+            //// ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
         /// <summary>
@@ -424,6 +549,7 @@
         /// <param name="other">The other <see cref="Vector2D"/></param>
         /// <param name="tolerance">The tolerance when comparing the x and y components</param>
         /// <returns>True if found to be equal.</returns>
+        [Pure]
         public bool Equals(Vector2D other, double tolerance)
         {
             if (tolerance < 0)
@@ -436,6 +562,7 @@
         }
 
         /// <inheritdoc />
+        [Pure]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -447,6 +574,7 @@
         }
 
         /// <inheritdoc />
+        [Pure]
         public override int GetHashCode()
         {
             unchecked
@@ -456,11 +584,64 @@
         }
 
         /// <inheritdoc />
+        [Pure]
         public override string ToString()
         {
-            var numberFormatInfo = CultureInfo.InvariantCulture.NumberFormat;
+            return this.ToString(null, CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Returns a string representation of this instance using the provided <see cref="IFormatProvider"/>
+        /// </summary>
+        /// <param name="provider">A <see cref="IFormatProvider"/></param>
+        /// <returns>The string representation of this instance.</returns>
+        [Pure]
+        public string ToString(IFormatProvider provider)
+        {
+            return this.ToString(null, provider);
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        public string ToString(string format, IFormatProvider provider = null)
+        {
+            var numberFormatInfo = provider != null ? NumberFormatInfo.GetInstance(provider) : CultureInfo.InvariantCulture.NumberFormat;
             var separator = numberFormatInfo.NumberDecimalSeparator == "," ? ";" : ",";
-            return $"({this.X.ToString()}{separator}\u00A0{this.Y.ToString()})";
+            return $"({this.X.ToString(format, numberFormatInfo)}{separator}\u00A0{this.Y.ToString(format, numberFormatInfo)})";
+        }
+
+        /// <inheritdoc />
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        /// <inheritdoc />
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            if (reader.TryReadAttributeAsDouble("X", out var x) &&
+                reader.TryReadAttributeAsDouble("Y", out var y))
+            {
+                reader.Skip();
+                this = new Vector2D(x, y);
+                return;
+            }
+
+            if (reader.TryReadChildElementsAsDoubles("X", "Y", out x, out y))
+            {
+                reader.Skip();
+                this = new Vector2D(x, y);
+                return;
+            }
+
+            throw new XmlException("Could not read a Vector2D");
+        }
+
+        /// <inheritdoc />
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttribute("X", this.X);
+            writer.WriteAttribute("Y", this.Y);
         }
     }
 }
