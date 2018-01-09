@@ -1,25 +1,7 @@
-﻿using MathNet.Spatial.Euclidean;
-using System;
-using System.Globalization;
-using System.Runtime.Serialization;
-using System.Xml;
-using System.Xml.Linq;
-
-namespace MathNet.Spatial.Serialization.Xml
+﻿namespace MathNet.Spatial.Serialization
 {
-    [DataContract(Name = "Circle3D")]
-    public class Circle3DSurrogate
-    {
-        [DataMember(Order = 1)]
-        public Point3D CenterPoint;
-        [DataMember(Order = 2)]
-        public UnitVector3D Axis;
-        [DataMember(Order = 3)]
-        public double Radius;
-
-        public static implicit operator Circle3DSurrogate(Circle3D circle) => new Circle3DSurrogate { CenterPoint = circle.CenterPoint, Axis = circle.Axis, Radius = circle.Radius };
-        public static implicit operator Circle3D(Circle3DSurrogate circle) => new Circle3D(circle.CenterPoint, circle.Axis, circle.Radius);
-    }
+    using System.Runtime.Serialization;
+    using MathNet.Spatial.Euclidean;
 
     internal class Circle3DSerializer : ISerializationSurrogate
     {

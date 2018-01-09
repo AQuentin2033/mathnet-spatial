@@ -15,6 +15,12 @@
         public ProtobufNetTests()
         {
             var model = ProtoBuf.Meta.RuntimeTypeModel.Default;
+            var surrogates = SerializerFactory.KnownSurrogates();
+            surrogates.ForEach(t =>
+            {
+                model.Add(t.Item2, true);
+                model.Add(t.Item1, false).SetSurrogate(t.Item2);
+            });
         }
 
         [TestCase("15 °")]
@@ -69,7 +75,7 @@
         [TestCase("1, 2, 3", "-1, 2, 3", false)]
         public void Ray3DProtoBuf(string ps, string vs, bool asElements)
         {
-            var ray = new Ray3D(Point3D.Parse(ps), UnitVector3D.Parse(vs));
+            var ray = new Ray3D(Point3D.Parse(ps), Vector3D.Parse(vs).Normalize());
             var result = this.ProtobufRoundTrip(ray);
             Assert.AreEqual(ray, result);
             AssertGeometry.AreEqual(ray, result, 1e-6);
@@ -162,6 +168,14 @@
             var cs = new Euclidean.CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
             var result = this.ProtobufRoundTrip(cs);
             AssertGeometry.AreEqual(cs, result);
+        }
+
+        [Test]
+        public void UnitVector3DProtoBuf()
+        {
+            var uv = UnitVector3D.Create(0.2672612419124244, -0.53452248382484879, 0.80178372573727319);
+            var result = this.ProtobufRoundTrip(uv);
+            AssertGeometry.AreEqual(uv, result);
         }
 
         private T ProtobufRoundTrip<T>(T test)

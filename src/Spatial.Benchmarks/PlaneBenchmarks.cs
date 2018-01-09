@@ -2,8 +2,8 @@
 {
     using System;
     using BenchmarkDotNet.Attributes;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
 
     public class PlaneBenchmarks
     {

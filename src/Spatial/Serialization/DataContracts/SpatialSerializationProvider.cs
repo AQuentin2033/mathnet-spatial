@@ -1,12 +1,12 @@
-﻿using MathNet.Spatial.Euclidean;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-
-namespace MathNet.Spatial.Serialization.Xml
+﻿namespace MathNet.Spatial.Serialization.DataContracts
 {
+    using MathNet.Spatial.Euclidean;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Text;
+
     public class SpatialSerializationProvider : ISerializationSurrogateProvider
     {
         /// <summary>
@@ -20,6 +20,7 @@ namespace MathNet.Spatial.Serialization.Xml
                 var conversionmethod = y.Surrogate.GetMethod("op_Implicit", new[] { y.Surrogate });
                 return conversionmethod.Invoke(null, new[] { obj });
             }
+
             return obj;
         }
 
@@ -34,6 +35,7 @@ namespace MathNet.Spatial.Serialization.Xml
                 var conversionmethod = y.Surrogate.GetMethod("op_Implicit", new[] { y.Source });
                 return conversionmethod.Invoke(null, new[] { obj });
             }
+
             return obj;
         }
 
@@ -43,10 +45,13 @@ namespace MathNet.Spatial.Serialization.Xml
         public Type GetSurrogateType(Type type)
         {
             if (SerializerFactory.SurrogateMap.Exists(t => t.Source == type))
+            {
                 return SerializerFactory.SurrogateMap.Where(t => t.Source == type).First().Surrogate;
+            }
             else
+            {
                 return type;
+            }
         }
-
     }
 }

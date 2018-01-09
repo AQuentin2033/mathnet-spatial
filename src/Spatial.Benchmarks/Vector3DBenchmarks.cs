@@ -2,8 +2,8 @@
 {
     using System.Runtime.CompilerServices;
     using BenchmarkDotNet.Attributes;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
 
     public class Vector3DBenchmarks
     {

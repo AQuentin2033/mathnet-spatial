@@ -3,8 +3,8 @@
     using System.Globalization;
     using BenchmarkDotNet.Attributes;
     using MathNet.Numerics.LinearAlgebra;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
 
     public class Point3DBenchmarks
     {

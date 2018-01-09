@@ -4,7 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using BenchmarkDotNet.Attributes;
-    using MathNet.Spatial.Euclidean;
+    using MathNet.Spatial;
+    using MathNet.Spatial.Euclidean2D;
 
     public class Polygon2DBenchmarks
     {

@@ -89,7 +89,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 0, 1).AsRowMajorArray();
+                var row = this.SubMatrix(0, 3, 0, 1).ToRowWiseArray();
                 return new Vector3D(row[0], row[1], row[2]);
             }
         }
@@ -101,7 +101,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 1, 1).AsRowMajorArray();
+                var row = this.SubMatrix(0, 3, 1, 1).ToRowWiseArray();
                 return new Vector3D(row[0], row[1], row[2]);
             }
         }
@@ -113,7 +113,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 2, 1).AsRowMajorArray();
+                var row = this.SubMatrix(0, 3, 2, 1).ToRowWiseArray();
                 return new Vector3D(row[0], row[1], row[2]);
             }
         }
@@ -125,7 +125,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 3, 1).AsRowMajorArray();
+                var row = this.SubMatrix(0, 3, 3, 1).ToRowWiseArray();
                 return new Point3D(row[0], row[1], row[2]);
             }
         }

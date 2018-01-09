@@ -1,6 +1,8 @@
 ﻿namespace MathNet.Spatial.Serialization.Xml.UnitTests
 {
+    using System.Diagnostics;
     using System.Linq;
+    using MathNet.Numerics.UnitTests.Serialization;
     using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
     using MathNet.Spatial.Euclidean2D;
@@ -64,7 +66,7 @@
         [TestCase("1, 2, 3", "-1, 2, 3", false)]
         public void Ray3DJson(string ps, string vs, bool asElements)
         {
-            var ray = new Ray3D(Point3D.Parse(ps), UnitVector3D.Parse(vs));
+            var ray = new Ray3D(Point3D.Parse(ps), Vector3D.Parse(vs).Normalize());
             var result = this.JsonRoundTrip(ray);
             Assert.AreEqual(ray, result);
             AssertGeometry.AreEqual(ray, result, 1e-6);
@@ -159,10 +161,21 @@
             AssertGeometry.AreEqual(cs, result);
         }
 
+        [Test]
+        public void UnitVector3DJson()
+        {
+            var uv = UnitVector3D.Create(0.2672612419124244, -0.53452248382484879, 0.80178372573727319);
+            var result = this.JsonRoundTrip(uv);
+            AssertGeometry.AreEqual(uv, result);
+        }
+
         private T JsonRoundTrip<T>(T test)
         {
-            string output = JsonConvert.SerializeObject(test);
-            return JsonConvert.DeserializeObject<T>(output);
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.Converters.Add(new SpatialJsonConverter());
+            string output = JsonConvert.SerializeObject(test, settings);
+            Debug.WriteLine("json: " + output);
+            return JsonConvert.DeserializeObject<T>(output, settings);
         }
     }
 }

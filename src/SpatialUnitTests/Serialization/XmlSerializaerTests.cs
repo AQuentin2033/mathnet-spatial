@@ -198,6 +198,16 @@
         }
 
         [Test]
+        public void UnitVector3DXml()
+        {
+            var uv = UnitVector3D.Create(0.2672612419124244, -0.53452248382484879, 0.80178372573727319);
+            var xml = @"<UnitVector3D X=""0.2672612419124244"" Y=""-0.53452248382484879"" Z=""0.80178372573727319"" />";
+            var elementXml = @"<UnitVector3D><X>0.2672612419124244</X><Y>-0.53452248382484879</Y><Z>0.80178372573727319</Z></UnitVector3D>";
+
+            AssertXml.XmlRoundTrips(uv, xml, (e, a) => AssertGeometry.AreEqual(e, a));
+        }
+
+        [Test]
         public void CoordinateSystemXml()
         {
             var cs = new Euclidean.CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));

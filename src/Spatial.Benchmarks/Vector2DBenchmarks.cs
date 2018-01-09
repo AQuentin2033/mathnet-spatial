@@ -2,15 +2,13 @@
 {
     using System.Globalization;
     using BenchmarkDotNet.Attributes;
-    using MathNet.Numerics.LinearAlgebra;
-    using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
+    using MathNet.Spatial.Euclidean2D;
 
     public class Vector2DBenchmarks
     {
         private static readonly Vector2D P1 = new Vector2D(1, 2);
         private static readonly Vector2D P2 = new Vector2D(1, 2);
-        private static readonly Vector<double> Vector = P1.ToVector();
 
         [Benchmark]
         public double Length()
@@ -64,12 +62,6 @@
         public Vector2D Parse()
         {
             return Vector2D.Parse("1; 2", CultureInfo.InvariantCulture);
-        }
-
-        [Benchmark]
-        public Vector2D OfVector()
-        {
-            return Vector2D.OfVector(Vector);
         }
 
         [Benchmark]
@@ -160,12 +152,6 @@
         public Vector2D Add()
         {
             return P1.Add(P2);
-        }
-
-        [Benchmark]
-        public object ToVector()
-        {
-            return P1.ToVector();
         }
 
         [Benchmark]

@@ -6,6 +6,7 @@
     using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
     using MathNet.Spatial.Euclidean2D;
+    using MathNet.Spatial.Serialization;
     using NUnit.Framework;
 
     public class BinaryFormatterTests
@@ -61,7 +62,7 @@
             Assert.AreEqual(plane, result);
         }
 
-        [TestCase("1, 2, 3", "-1, 2, 3", false)]
+        [TestCase("1, 2, 3", "0, 0, 1", false)]
         public void Ray3DBinaryFormatter(string ps, string vs, bool asElements)
         {
             var ray = new Ray3D(Point3D.Parse(ps), UnitVector3D.Parse(vs));
@@ -159,13 +160,21 @@
             AssertGeometry.AreEqual(cs, result);
         }
 
+        [Test]
+        public void UnitVector3DBinaryFormatter()
+        {
+            var uv = UnitVector3D.Create(0.2672612419124244, -0.53452248382484879, 0.80178372573727319);
+            var result = this.BinaryFormmaterRoundTrip(uv);
+            AssertGeometry.AreEqual(uv, result);
+        }
+
         private T BinaryFormmaterRoundTrip<T>(T test)
         {
             using (var ms = new MemoryStream())
             {
                 var formatter = new BinaryFormatter();
 
-                // formatter.SurrogateSelector = SerializerFactory.CreateSurrogateSelector();
+                formatter.SurrogateSelector = SerializerFactory.CreateSurrogateSelector();
                 formatter.Serialize(ms, test);
                 ms.Flush();
                 ms.Position = 0;

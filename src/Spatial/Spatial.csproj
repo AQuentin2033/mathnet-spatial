@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net471;netstandard2.0</TargetFrameworks>
     <AssemblyName>MathNet.Spatial</AssemblyName>
     <RootNamespace>MathNet.Spatial</RootNamespace>
     <CodeAnalysisRuleSet>Spatial.ruleset</CodeAnalysisRuleSet>
@@ -42,7 +42,7 @@
   <PropertyGroup Condition="$(TargetFramework.Contains('netcoreapp')) OR $(TargetFramework.Contains('netstandard'))">
     <DefineConstants>NETSTANDARD</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net471' ">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -68,7 +68,7 @@
   <PropertyGroup Condition="$(TargetFramework.Contains('netcoreapp')) OR $(TargetFramework.Contains('netstandard'))">
     <DocumentationFile>..\..\out\lib\netstandard2.0\MathNet.Spatial.xml</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net471'">
     <DefineConstants>NET45;NETFULL</DefineConstants>
     <DocumentationFile>..\..\out\lib\net40\MathNet.Spatial.xml</DocumentationFile>
   </PropertyGroup>
@@ -91,7 +91,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Serialization\" />
     <Folder Include="Units\" />
   </ItemGroup>
   <ItemGroup>

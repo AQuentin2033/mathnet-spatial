@@ -1,27 +1,12 @@
-﻿using MathNet.Spatial.Euclidean;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Xml;
-using System.Xml.Linq;
-
-namespace MathNet.Spatial.Serialization.Xml
+﻿namespace MathNet.Spatial.Serialization
 {
-    [DataContract(Name = "PolyLine2D")]
-    public class PolyLine2DSurrogate
-    {
-        [DataMember(Order = 1)]
-        public List<Point2D> Points;
-
-        public static implicit operator PolyLine2DSurrogate(PolyLine2D polyline) => new PolyLine2DSurrogate { Points = new List<Point2D>(polyline) };
-        public static implicit operator PolyLine2D(PolyLine2DSurrogate polyline) => new PolyLine2D(polyline.Points);
-    }
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Runtime.Serialization;
+    using MathNet.Spatial.Euclidean2D;
 
     internal class PolyLine2DSerializer : ISerializationSurrogate
     {
-
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             PolyLine2D line = (PolyLine2D)obj;

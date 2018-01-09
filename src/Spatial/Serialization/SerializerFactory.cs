@@ -1,13 +1,14 @@
-﻿using MathNet.Spatial.Euclidean;
-using MathNet.Spatial.Units;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-
-namespace MathNet.Spatial.Serialization.Xml
+﻿namespace MathNet.Spatial.Serialization
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Text;
+    using MathNet.Spatial;
+    using MathNet.Spatial.Euclidean;
+    using MathNet.Spatial.Euclidean2D;
+
     public static class SerializerFactory
     {
         internal class ContractConvertor
@@ -33,13 +34,15 @@ namespace MathNet.Spatial.Serialization.Xml
             new ContractConvertor(typeof(UnitVector3D), typeof(UnitVector3DSurrogate), new UnitVector3DSerializer()),
             new ContractConvertor(typeof(Angle), typeof(AngleSurrogate), new AngleSerializer()),
             new ContractConvertor(typeof(EulerAngles), typeof(EulerAnglesSurrogate), new EulerAnglesSerializer()),
-            new ContractConvertor(typeof(Line2D), typeof(Line2DSurrogate), new Line2DSerializer()),
-            new ContractConvertor(typeof(Line3D), typeof(Line3DSurrogate), new Line3DSerializer()),
+            new ContractConvertor(typeof(LineSegment2D), typeof(LineSegment2DSurrogate), new LineSegment2DSerializer()),
+            new ContractConvertor(typeof(LineSegment3D), typeof(LineSegment3DSurrogate), new LineSegment3DSerializer()),
             new ContractConvertor(typeof(Quaternion), typeof(QuaternionSurrogate), new QuaternionSerializer()),
+            new ContractConvertor(typeof(Circle2D), typeof(Circle2DSurrogate), new Circle2DSerializer()),
             new ContractConvertor(typeof(Circle3D), typeof(Circle3DSurrogate), new Circle3DSerializer()),
             new ContractConvertor(typeof(Polygon2D), typeof(Polygon2DSurrogate), new Polygon2DSerializer()),
             new ContractConvertor(typeof(PolyLine2D), typeof(PolyLine2DSurrogate), new PolyLine2DSerializer()),
             new ContractConvertor(typeof(PolyLine3D), typeof(PolyLine3DSurrogate), new PolyLine3DSerializer()),
+            new ContractConvertor(typeof(Euclidean.CoordinateSystem), typeof(CoordinateSystemSurrogate), new CoordinateSystemSerializer()),
             new ContractConvertor(typeof(Ray3D), typeof(Ray3DSurrogate), new Ray3DSerializer()),
             new ContractConvertor(typeof(Plane), typeof(PlaneSurrogate), new PlaneSerializer())
         };
@@ -51,6 +54,7 @@ namespace MathNet.Spatial.Serialization.Xml
             {
                 s.AddSurrogate(SerializerFactory.SurrogateMap[i].Source, new StreamingContext(StreamingContextStates.All), SerializerFactory.SurrogateMap[i].Serializer);
             }
+
             return s;
         }
 
@@ -59,11 +63,53 @@ namespace MathNet.Spatial.Serialization.Xml
             return SurrogateMap.Select(t => new Tuple<Type, Type>(t.Source, t.Surrogate)).ToList();
         }
 
-        public static DataContractSerializer CreateDataContractSerializer(object item)
+        public static bool CanConvert(Type type)
         {
-            var serializer = new DataContractSerializer(item.GetType());
-            serializer.SetSerializationSurrogateProvider(new SpatialSerializationProvider());
-            return serializer;
+            for (int i = 0; i < SerializerFactory.SurrogateMap.Count; i++)
+            {
+                if (SurrogateMap[i].Source == type)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static Type GetSurrogateType(Type type)
+        {
+            if (SerializerFactory.SurrogateMap.Exists(t => t.Source == type))
+            {
+                return SerializerFactory.SurrogateMap.Where(t => t.Source == type).First().Surrogate;
+            }
+            else
+            {
+                return type;
+            }
+        }
+
+        public static object GetObjectToSerialize(Type type, object obj)
+        {
+            if (SerializerFactory.SurrogateMap.Exists(t => t.Source == type))
+            {
+                var y = SerializerFactory.SurrogateMap.Where(t => t.Source == type).First();
+                var conversionmethod = y.Surrogate.GetMethod("op_Implicit", new[] { y.Source });
+                return conversionmethod.Invoke(null, new[] { obj });
+            }
+
+            return obj;
+        }
+
+        public static object GetDeserializedObject(Type surrogateType, object obj)
+        {
+            if (SerializerFactory.SurrogateMap.Exists(t => t.Surrogate == surrogateType))
+            {
+                var y = SerializerFactory.SurrogateMap.Where(t => t.Surrogate == surrogateType).First();
+                var conversionmethod = y.Surrogate.GetMethod("op_Implicit", new[] { y.Surrogate });
+                return conversionmethod.Invoke(null, new[] { obj });
+            }
+
+            return obj;
         }
     }
 }

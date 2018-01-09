@@ -1,9 +1,7 @@
 ﻿namespace MathNet.Spatial.Euclidean2D
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using MathNet.Spatial;
     using MathNet.Spatial.Internals;
@@ -11,7 +9,7 @@
     /// <summary>
     /// Class to represent a closed polygon.
     /// </summary>
-    public class Polygon2D : IEnumerable<Point2D>, IEquatable<Polygon2D>
+    public class Polygon2D : IEquatable<Polygon2D>
     {
         /// <summary>
         /// A list of vertices.
@@ -56,12 +54,6 @@
         }
 
         /// <summary>
-        /// Gets the number of vertices in the polygon.
-        /// </summary>
-        [Obsolete("Use VertexCount instead, obsolete since 6/12/2017")]
-        public int Count => this.points.Count;
-
-        /// <summary>
         /// Gets a list of vertices
         /// </summary>
         public IEnumerable<Point2D> Vertices
@@ -100,39 +92,6 @@
         public int VertexCount => this.points.Count;
 
         /// <summary>
-        /// A index into the list of vertices
-        /// </summary>
-        /// <param name="key">An index for the vertex number</param>
-        /// <returns>A Vertex</returns>
-        [Obsolete("Use Vertices instead, obsolete since 6/12/2017")]
-        public Point2D this[int key] => this.points[key];
-
-        /// <summary>
-        /// Adds a vector to the each point on the polygon
-        /// </summary>
-        /// <param name="shift">The vector to add</param>
-        /// <param name="poly">The polygon</param>
-        /// <returns>A new <see cref="Polygon2D"/> at the adjusted points</returns>
-        [Obsolete("Use Translate instance method instead, obsolete since 6/12/2017")]
-        public static Polygon2D operator +(Vector2D shift, Polygon2D poly)
-        {
-            var newPoints = from p in poly select p + shift;
-            return new Polygon2D(newPoints);
-        }
-
-        /// <summary>
-        /// Adds a vector to the each point on the polygon
-        /// </summary>
-        /// <param name="poly">The polygon</param>
-        /// <param name="shift">The vector to add</param>
-        /// <returns>A new <see cref="Polygon2D"/> at the adjusted points</returns>
-        [Obsolete("Use Translate instance method instead, obsolete since 6/12/2017")]
-        public static Polygon2D operator +(Polygon2D poly, Vector2D shift)
-        {
-            return shift + poly;
-        }
-
-        /// <summary>
         /// Compute whether or not two polygons are colliding based on whether or not the vertices of
         /// either are enclosed within the shape of the other. This is a simple means of detecting collisions
         /// that can fail if the two polygons are heavily overlapped in such a way that one protrudes through
@@ -143,33 +102,7 @@
         /// <returns>True if the vertices collide; otherwise false.</returns>
         public static bool ArePolygonVerticesColliding(Polygon2D a, Polygon2D b)
         {
-            return a.Any(b.EnclosesPoint) || b.Any(a.EnclosesPoint);
-        }
-
-        /// <summary>
-        /// Determine whether or not a point is inside a polygon using the intersection counting
-        /// method.  Return true if the point is contained, false if it is not. Points which lie
-        /// on the edge are not counted as inside the polygon.
-        /// </summary>
-        /// <param name="p">A point</param>
-        /// <param name="poly">A polygon</param>
-        /// <returns>True if the point is inside the polygon; otherwise false.</returns>
-        [Obsolete("Use instance method EnclosesPoint instead, obsolete since 6/12/2017")]
-        public static bool IsPointInPolygon(Point2D p, Polygon2D poly)
-        {
-            // Algorithm from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-            // translated into C#
-            var c = false;
-            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
-            {
-                if (((poly[i].Y > p.Y) != (poly[j].Y > p.Y)) &&
-                    (p.X < ((poly[j].X - poly[i].X) * (p.Y - poly[i].Y) / (poly[j].Y - poly[i].Y)) + poly[i].X))
-                {
-                    c = !c;
-                }
-            }
-
-            return c;
+            return a.points.Any(b.EnclosesPoint) || b.points.Any(a.EnclosesPoint);
         }
 
         /// <summary>
@@ -294,28 +227,7 @@
             return new PolyLine2D(points);
         }
 
-        /// <summary>
-        /// Returns an enumerator for the vertices
-        /// </summary>
-        /// <returns>An enumerator for the vertices</returns>
-        [Obsolete("Use Verticies instead, obsolete since 6/12/2017")]
-        public IEnumerator<Point2D> GetEnumerator()
-        {
-            return this.points.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Returns an enumerator for the vertices
-        /// </summary>
-        /// <returns>An enumerator for the vertices</returns>
-        [Obsolete("Use Verticies instead, obsolete since 6/12/2017")]
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
         /// <inheritdoc />
-        [Pure]
         public bool Equals(Polygon2D other)
         {
             for (var i = 0; i < this.points.Count; i++)
@@ -335,7 +247,6 @@
         /// <param name="other">The polygon to compare against.</param>
         /// <param name="tolerance">A tolerance (epsilon) to adjust for floating point error</param>
         /// <returns>true if the polygons are equal; otherwise false</returns>
-        [Pure]
         public bool Equals(Polygon2D other, double tolerance)
         {
             for (var i = 0; i < this.points.Count; i++)
@@ -350,7 +261,6 @@
         }
 
         /// <inheritdoc />
-        [Pure]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -362,7 +272,6 @@
         }
 
         /// <inheritdoc />
-        [Pure]
         public override int GetHashCode()
         {
             return this.Vertices.GetHashCode();
