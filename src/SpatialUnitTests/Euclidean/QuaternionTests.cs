@@ -3,8 +3,8 @@
     using System;
     using System.Collections;
     using NUnit.Framework;
+    using Spatial;
     using Spatial.Euclidean;
-    using Spatial.Units;
 
     /// <summary>
     /// Complex32 tests.

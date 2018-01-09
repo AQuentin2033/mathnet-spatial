@@ -5,18 +5,14 @@ namespace MathNet.Spatial.Euclidean
     using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra;
+    using MathNet.Spatial;
     using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
 
     /// <summary>
     /// A struct representing a vector in 3D space
     /// </summary>
-    [Serializable]
-    public struct Vector3D : IXmlSerializable, IEquatable<Vector3D>, IEquatable<UnitVector3D>, IFormattable
+    public struct Vector3D : IEquatable<Vector3D>, IEquatable<UnitVector3D>, IFormattable
     {
         /// <summary>
         /// The x component.
@@ -274,16 +270,6 @@ namespace MathNet.Spatial.Euclidean
             }
 
             return new Vector3D(vector.At(0), vector.At(1), vector.At(2));
-        }
-
-        /// <summary>
-        /// Creates an <see cref="Vector3D"/> from an <see cref="XmlReader"/>.
-        /// </summary>
-        /// <param name="reader">An <see cref="XmlReader"/> positioned at the node to read into this <see cref="Vector3D"/>.</param>
-        /// <returns>An <see cref="Vector3D"/> that contains the data read from the reader.</returns>
-        public static Vector3D ReadFrom(XmlReader reader)
-        {
-            return reader.ReadElementAs<Vector3D>();
         }
 
         ////public static explicit operator Vector3D(System.Windows.Media.Media3D.Vector3D v)
@@ -570,21 +556,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <summary>
-        /// Rotates a Vector
-        /// </summary>
-        /// <typeparam name="T">An Angleunit</typeparam>
-        /// <param name="about">A unitvector</param>
-        /// <param name="angle">An angle</param>
-        /// <param name="angleUnit">A type of angle</param>
-        /// <returns>A new vector</returns>
-        [Obsolete("This method will be removed prefer the other overload.. Made obsolete 2017-12-05.")]
-        public Vector3D Rotate<T>(UnitVector3D about, double angle, T angleUnit)
-            where T : IAngleUnit
-        {
-            return this.Rotate(about, Angle.From(angle, angleUnit));
-        }
-
-        /// <summary>
         /// Returns a vector that is this vector rotated the signed angle around the about vector
         /// </summary>
         /// <param name="about">A vector to rotate about</param>
@@ -763,42 +734,6 @@ namespace MathNet.Spatial.Euclidean
                 hashCode = (hashCode * 397) ^ this.Z.GetHashCode();
                 return hashCode;
             }
-        }
-
-        /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            if (reader.TryReadAttributeAsDouble("X", out var x) &&
-                reader.TryReadAttributeAsDouble("Y", out var y) &&
-                reader.TryReadAttributeAsDouble("Z", out var z))
-            {
-                reader.Skip();
-                this = new Vector3D(x, y, z);
-                return;
-            }
-
-            if (reader.TryReadChildElementsAsDoubles("X", "Y", "Z", out x, out y, out z))
-            {
-                reader.Skip();
-                this = new Vector3D(x, y, z);
-                return;
-            }
-
-            throw new XmlException($"Could not read a {this.GetType()}");
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttribute("X", this.X);
-            writer.WriteAttribute("Y", this.Y);
-            writer.WriteAttribute("Z", this.Z);
         }
     }
 }

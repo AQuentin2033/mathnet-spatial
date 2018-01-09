@@ -2,13 +2,9 @@
 namespace MathNet.Spatial.UnitTests.Euclidean
 {
     using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Xml;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra;
-    using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
+    using MathNet.Spatial.Euclidean2D;
     using NUnit.Framework;
 
     public class Vector2DTests
@@ -86,17 +82,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             Assert.Throws<ArgumentOutOfRangeException>(() => Vector2D.FromPolar(-1.0, Angle.FromRadians(0)));
         }
 
-        [Test]
-        public void OfVector()
-        {
-            var v = Vector2D.OfVector(Vector<double>.Build.Dense(new[] { 1.0, 2 }));
-            Assert.AreEqual(1, v.X);
-            Assert.AreEqual(2, v.Y);
-
-            Assert.Throws<ArgumentException>(() => Vector2D.OfVector(Vector<double>.Build.Dense(new[] { 1.0 })));
-            Assert.Throws<ArgumentException>(() => Vector2D.OfVector(Vector<double>.Build.Dense(new[] { 1.0, 2, 3 })));
-        }
-
         [TestCase("-1,1", -1, 1)]
         [TestCase("1, 2", 1, 2)]
         [TestCase("1.2; 3.4", 1.2, 3.4)]
@@ -131,16 +116,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
         {
             Assert.AreEqual(false, Vector2D.TryParse(text, out _));
             Assert.Throws<FormatException>(() => Vector2D.Parse(text));
-        }
-
-        [TestCase(@"<Vector2D X=""1"" Y=""2"" />")]
-        [TestCase(@"<Vector2D Y=""2"" X=""1""/>")]
-        [TestCase(@"<Vector2D><X>1</X><Y>2</Y></Vector2D>")]
-        [TestCase(@"<Vector2D><Y>2</Y><X>1</X></Vector2D>")]
-        public void ReadFrom(string xml)
-        {
-            var v = new Vector2D(1, 2);
-            AssertGeometry.AreEqual(v, Vector2D.ReadFrom(XmlReader.Create(new StringReader(xml))));
         }
 
         [TestCase("-1, -2", "1, 2", "0, 0")]
@@ -184,16 +159,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
         {
             var v = Vector2D.Parse(vs);
             Assert.AreEqual(expected, v.Length, 1e-6);
-        }
-
-        [Test]
-        public void ToDenseVector()
-        {
-            var v = new Vector2D(1, 2);
-            var actual = v.ToVector();
-            Assert.AreEqual(2, actual.Count);
-            Assert.AreEqual(1, actual[0]);
-            Assert.AreEqual(2, actual[1]);
         }
 
         [TestCase("1, 0", "1, 0", 1e-4, false)]
@@ -316,18 +281,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             Assert.AreEqual(expected, av.Degrees, 0.1);
         }
 
-        [Test]
-        public void CheckCachedXAxis()
-        {
-            AssertGeometry.AreEqual(new Vector2D(1, 0), Vector2D.XAxis);
-        }
-
-        [Test]
-        public void CheckCachedYAxis()
-        {
-            AssertGeometry.AreEqual(new Vector2D(0, 1), Vector2D.YAxis);
-        }
-
         [TestCase("1,0", "0,1", "90°")]
         [TestCase("2,0", "0,3", "90°")]
         [TestCase("1,0", "0,-1", "90°")]
@@ -408,61 +361,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             var v1 = new Vector2D(0, 0);
             var v2 = new Vector2D(1, 1);
             Assert.Throws<ArgumentException>(() => v1.Equals(v2, -0.01));
-        }
-
-        [TestCase("-2, 0", null, "(-2,\u00A00)")]
-        [TestCase("-2, 0", "N2", "(-2.00,\u00A00.00)")]
-        public void ToString(string vs, string format, string expected)
-        {
-            var v = Vector2D.Parse(vs);
-            var actual = v.ToString(format);
-            Assert.AreEqual(expected, actual);
-            Assert.AreEqual(v, Vector2D.Parse(actual));
-        }
-
-        [Test]
-        public void XmlRoundtrip()
-        {
-            var v = new Vector2D(1, 2);
-            AssertXml.XmlRoundTrips(v, @"<Vector2D X=""1"" Y=""2"" />", (e, a) => AssertGeometry.AreEqual(e, a));
-        }
-
-        [Test]
-        public void XmlContainerRoundtrip()
-        {
-            var container = new AssertXml.Container<Vector2D>
-            {
-                Value1 = new Vector2D(1, 2),
-                Value2 = new Vector2D(3, 4)
-            };
-            var expected = "<ContainerOfVector2D>\r\n" +
-                           "  <Value1 X=\"1\" Y=\"2\"></Value1>\r\n" +
-                           "  <Value2 X=\"3\" Y=\"4\"></Value2>\r\n" +
-                           "</ContainerOfVector2D>";
-            var roundTrip = AssertXml.XmlSerializerRoundTrip(container, expected);
-            AssertGeometry.AreEqual(container.Value1, roundTrip.Value1);
-            AssertGeometry.AreEqual(container.Value2, roundTrip.Value2);
-        }
-
-        [Test]
-        public void XmlElements()
-        {
-            var v = new Vector2D(1, 2);
-            var serializer = new XmlSerializer(typeof(Vector2D));
-            AssertGeometry.AreEqual(v, (Vector2D)serializer.Deserialize(new StringReader(@"<Vector2D><X>1</X><Y>2</Y></Vector2D>")));
-        }
-
-        [Test]
-        public void XmlContainerElements()
-        {
-            var xml = "<ContainerOfVector2D>\r\n" +
-                      "  <Value1><X>1</X><Y>2</Y></Value1>\r\n" +
-                      "  <Value2><X>3</X><Y>4</Y></Value2>\r\n" +
-                      "</ContainerOfVector2D>";
-            var serializer = new XmlSerializer(typeof(AssertXml.Container<Vector2D>));
-            var deserialized = (AssertXml.Container<Vector2D>)serializer.Deserialize(new StringReader(xml));
-            AssertGeometry.AreEqual(new Vector2D(1, 2), deserialized.Value1);
-            AssertGeometry.AreEqual(new Vector2D(3, 4), deserialized.Value2);
         }
     }
 }

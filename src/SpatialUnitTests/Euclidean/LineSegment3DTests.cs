@@ -1,8 +1,8 @@
 ﻿namespace MathNet.Spatial.UnitTests.Euclidean
 {
     using System;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
     using NUnit.Framework;
 
     /// <summary>

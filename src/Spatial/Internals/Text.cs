@@ -3,7 +3,7 @@
     using System;
     using System.Globalization;
     using System.Text.RegularExpressions;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// Internal text processing

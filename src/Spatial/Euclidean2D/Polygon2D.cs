@@ -1,12 +1,12 @@
-﻿namespace MathNet.Spatial.Euclidean
+﻿namespace MathNet.Spatial.Euclidean2D
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Linq;
+    using MathNet.Spatial;
     using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
 
     /// <summary>
     /// Class to represent a closed polygon.

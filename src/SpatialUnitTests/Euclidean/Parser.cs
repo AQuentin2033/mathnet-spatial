@@ -1,14 +1,11 @@
-﻿// ReSharper disable UnusedMember.Global
-#pragma warning disable SA1600 // Elements must be documented
-namespace MathNet.Spatial
+﻿namespace MathNet.Spatial.UnitTests.Euclidean
 {
     using System;
     using System.Globalization;
     using System.Text.RegularExpressions;
     using MathNet.Spatial.Euclidean;
 
-    [Obsolete("This should not have been public, will be removed in a future version. Made obsolete 2017-12-03")]
-    public static class Parser
+    internal static class Parser
     {
         public const string SeparatorPattern = @" *[,;] *";
         public static readonly string DoublePattern = @"[+-]?\d*(?:[.,]\d+)?(?:[eE][+-]?\d+)?";

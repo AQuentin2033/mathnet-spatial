@@ -2,7 +2,7 @@
 {
     using System;
     using MathNet.Numerics.LinearAlgebra.Double;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// Helper class for creating matrices for manipulating 2D-elements

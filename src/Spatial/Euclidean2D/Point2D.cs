@@ -1,32 +1,37 @@
-namespace MathNet.Spatial.Euclidean
+namespace MathNet.Spatial.Euclidean2D
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra;
+    using MathNet.Spatial;
     using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
 
     /// <summary>
     /// Represents a point in 2 dimensional space
     /// </summary>
-    [Serializable]
-    public struct Point2D : IXmlSerializable, IEquatable<Point2D>, IFormattable
+    public struct Point2D : IEquatable<Point2D>, IDataTag, IGeometricContainable<Point2D>
     {
         /// <summary>
         /// The x coordinate
         /// </summary>
-        public readonly double X;
+        private double x;
 
         /// <summary>
-        /// The y coordinate
+        /// the y coordinate
         /// </summary>
-        public readonly double Y;
+        private double y;
+
+        /// <summary>
+        /// A reference to the coordinate system in use, if any
+        /// </summary>
+        private CoordinateSystem cs;
+
+        /// <summary>
+        /// A value to indicate if the struct is unmodifiable
+        /// </summary>
+        private bool frozen;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Point2D"/> struct.
@@ -36,58 +41,140 @@ namespace MathNet.Spatial.Euclidean
         /// <param name="y">The y coordinate</param>
         public Point2D(double x, double y)
         {
-            this.X = x;
-            this.Y = y;
+            this.x = x;
+            this.y = y;
+            this.cs = null;
+            this.Tag = null;
+            this.Parent = null;
+            this.frozen = false;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Point2D"/> struct.
-        /// Creates a point r from origin rotated a counterclockwise from X-Axis
+        /// Creates a point for given coordinates (x, y)
+        ///
         /// </summary>
-        /// <param name="r">distance from origin</param>
-        /// <param name="a">the angle</param>
-        [Obsolete("This constructor will be removed, use FromPolar. Made obsolete 2017-12-03.")]
-        public Point2D(double r, Angle a)
-            : this(r * Math.Cos(a.Radians), r * Math.Sin(a.Radians))
+        /// <param name="x">The x coordinate</param>
+        /// <param name="y">The y coordinate</param>
+        /// <param name="parent">The parent container</param>
+        internal Point2D(double x, double y, IGeometricContainer parent)
         {
-            if (r < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(r), r, "Expected a radius greater than or equal to zero.");
-            }
+            this.x = x;
+            this.y = y;
+            this.Tag = null;
+            this.Parent = parent;
+            this.cs = parent?.CoordinateSystem;
+            this.frozen = false;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Point2D"/> struct.
-        /// Creates a point from a list of coordinates (x, y)
+        /// Creates a point for given coordinates (x, y)
         /// </summary>
-        /// <param name="data">a pair of coordinates in the order x, y</param>
-        /// <exception cref="ArgumentException">Exception thrown if more than 2 coordinates are passed</exception>
-        [Obsolete("This constructor will be removed. Made obsolete 2017-12-03.")]
-        public Point2D(IEnumerable<double> data)
-            : this(data.ToArray())
+        /// <param name="x">The x coordinate</param>
+        /// <param name="y">The y coordinate</param>
+        /// <param name="cs">The coordinate system</param>
+        internal Point2D(double x, double y, CoordinateSystem cs)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Point2D"/> struct.
-        /// Creates a point from a list of coordinates (x, y)
-        /// </summary>
-        /// <param name="data">a pair of coordinates in the order x, y</param>
-        /// <exception cref="ArgumentException">Exception thrown if more than 2 coordinates are passed</exception>
-        [Obsolete("This constructor will be removed. Made obsolete 2017-12-03.")]
-        public Point2D(double[] data)
-            : this(data[0], data[1])
-        {
-            if (data.Length != 2)
-            {
-                throw new ArgumentException("data.Length != 2!");
-            }
+            this.x = x;
+            this.y = y;
+            this.cs = cs;
+            this.Tag = null;
+            this.Parent = null;
+            this.frozen = false;
         }
 
         /// <summary>
         /// Gets a point at the origin (0,0)
         /// </summary>
         public static Point2D Origin => new Point2D(0, 0);
+
+        /// <summary>
+        /// Gets the exact internal value of X.
+        /// When used in a coordinate system, it returns the internal double representation of the x coordinate.
+        /// When used outside a coordinate system, it returns the same as X
+        /// </summary>
+        public double ExactX => this.x;
+
+        /// <summary>
+        /// Gets the exact internal value of Y.
+        /// When used in a coordinate system, it returns the internal double representation of the y coordinate.
+        /// When used outside a coordinate system, it returns the same as Y
+        /// </summary>
+        public double ExactY => this.y;
+
+        /// <summary>
+        /// Gets or sets the x coordinate
+        /// </summary>
+        public double X
+        {
+            get
+            {
+                if (this.cs is null)
+                {
+                    return this.x;
+                }
+                else
+                {
+                    return Math.Round(this.x, this.cs.Precision, MidpointRounding.AwayFromZero);
+                }
+            }
+
+            set
+            {
+                if (this.frozen)
+                {
+                    throw new InvalidOperationException("Point is frozen");
+                }
+
+                this.x = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the y coordinate
+        /// </summary>
+        public double Y
+        {
+            get
+            {
+                if (this.cs is null)
+                {
+                    return this.y;
+                }
+                else
+                {
+                    return Math.Round(this.y, this.cs.Precision, MidpointRounding.AwayFromZero);
+                }
+            }
+
+            set
+            {
+                if (this.frozen)
+                {
+                    throw new InvalidOperationException("Point is frozen");
+                }
+
+                this.y = value;
+            }
+        }
+
+        /// <inheritdoc />
+        public object Tag { get; set; }
+
+        /// <inheritdoc />
+        public IGeometricContainer Parent { get; private set; }
+
+        /// <inheritdoc />
+        public bool CanFreeze => !this.frozen;
+
+        /// <inheritdoc />
+        public bool IsFrozen => this.frozen;
+
+        /// <summary>
+        /// Gets a reference to the coordinate system used
+        /// </summary>
+        internal CoordinateSystem CSReference => this.cs;
 
         /// <summary>
         /// Adds a point and a vector together
@@ -101,18 +188,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <summary>
-        /// Adds a point and a 3D vector together
-        /// </summary>
-        /// <param name="point">A point</param>
-        /// <param name="vector">A 3D vector</param>
-        /// <returns>A new point at the summed location ignoring the Z dimension</returns>
-        [Obsolete("This weird operator will be removed in a future version. Made obsolete 2017-12-03.")]
-        public static Point3D operator +(Point2D point, Vector3D vector)
-        {
-            return new Point3D(point.X + vector.X, point.Y + vector.Y, vector.Z);
-        }
-
-        /// <summary>
         /// Subtracts a vector from a point
         /// </summary>
         /// <param name="left">A point</param>
@@ -121,18 +196,6 @@ namespace MathNet.Spatial.Euclidean
         public static Point2D operator -(Point2D left, Vector2D right)
         {
             return new Point2D(left.X - right.X, left.Y - right.Y);
-        }
-
-        /// <summary>
-        /// Subtracts a 3D vector from a point
-        /// </summary>
-        /// <param name="left">A point</param>
-        /// <param name="right">A 3D vector</param>
-        /// <returns>A new point at the difference excluding the z dimension</returns>
-        [Obsolete("This weird operator will be removed in a future version. Made obsolete 2017-12-03.")]
-        public static Point3D operator -(Point2D left, Vector3D right)
-        {
-            return new Point3D(left.X - right.X, left.Y - right.Y, -1 * right.Z);
         }
 
         /// <summary>
@@ -234,16 +297,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <summary>
-        /// Creates an <see cref="Point2D"/> from an <see cref="XmlReader"/>.
-        /// </summary>
-        /// <param name="reader">An <see cref="XmlReader"/> positioned at the node to read into this <see cref="Point2D"/>.</param>
-        /// <returns>An <see cref="Point2D"/> that contains the data read from the reader.</returns>
-        public static Point2D ReadFrom(XmlReader reader)
-        {
-            return reader.ReadElementAs<Point2D>();
-        }
-
-        /// <summary>
         /// Returns the centeroid or center of mass of any set of points
         /// </summary>
         /// <param name="points">a list of points</param>
@@ -306,7 +359,6 @@ namespace MathNet.Spatial.Euclidean
         /// </summary>
         /// <param name="otherPoint">The point to which the vector should go</param>
         /// <returns>A vector pointing to the other point.</returns>
-        [Pure]
         public Vector2D VectorTo(Point2D otherPoint)
         {
             return otherPoint - this;
@@ -317,85 +369,46 @@ namespace MathNet.Spatial.Euclidean
         /// </summary>
         /// <param name="otherPoint">The other point</param>
         /// <returns>a distance measure</returns>
-        [Pure]
         public double DistanceTo(Point2D otherPoint)
         {
             var vector = this.VectorTo(otherPoint);
-            return vector.Length;
+            if (this.cs != null)
+            {
+                return Math.Round(vector.Length, this.cs.Precision, MidpointRounding.AwayFromZero);
+            }
+            else
+            {
+                return vector.Length;
+            }
         }
 
         /// <summary>
         /// Converts this point into a vector from the origin
         /// </summary>
         /// <returns>A vector equivalent to this point</returns>
-        [Pure]
         public Vector2D ToVector2D()
         {
             return new Vector2D(this.X, this.Y);
         }
 
         /// <summary>
-        /// return new Point3D(X, Y, 0);
-        /// </summary>
-        /// <returns>A <see cref="Point3D"/> with x and y from this instance and z = 0</returns>
-        [Obsolete("Use projections instead, Obsolete on 2017-12-10")]
-        [Pure]
-        public Point3D ToPoint3D()
-        {
-            return new Point3D(this.X, this.Y, 0);
-        }
-
-        /// <summary>
-        /// Applies a transform coordinatesystem to the point
-        /// </summary>
-        /// <param name="cs">A coordinate system</param>
-        /// <returns>A new 3D point</returns>
-        [Obsolete("Use projections instead, Obsolete on 2017-12-10")]
-        [Pure]
-        public Point3D TransformBy(CoordinateSystem cs)
-        {
-            return cs.Transform(this.ToPoint3D());
-        }
-
-        /// <summary>
         /// Convert to a Math.NET Numerics dense vector of length 2.
         /// </summary>
         /// <returns> A <see cref="Vector{Double}"/> with the x and y values from this instance.</returns>
-        [Pure]
         public Vector<double> ToVector()
         {
             return Vector<double>.Build.Dense(new[] { this.X, this.Y });
         }
 
         /// <inheritdoc />
-        [Pure]
         public override string ToString()
         {
-            return this.ToString(null, CultureInfo.InvariantCulture);
-        }
-
-        /// <summary>
-        /// Returns a string representation of this instance using the provided <see cref="IFormatProvider"/>
-        /// </summary>
-        /// <param name="provider">A <see cref="IFormatProvider"/></param>
-        /// <returns>The string representation of this instance.</returns>
-        [Pure]
-        public string ToString(IFormatProvider provider)
-        {
-            return this.ToString(null, provider);
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        public string ToString(string format, IFormatProvider provider = null)
-        {
-            var numberFormatInfo = provider != null ? NumberFormatInfo.GetInstance(provider) : CultureInfo.InvariantCulture.NumberFormat;
+            var numberFormatInfo = CultureInfo.InvariantCulture.NumberFormat;
             var separator = numberFormatInfo.NumberDecimalSeparator == "," ? ";" : ",";
-            return $"({this.X.ToString(format, numberFormatInfo)}{separator}\u00A0{this.Y.ToString(format, numberFormatInfo)})";
+            return $"({this.X}{separator}\u00A0{this.Y})";
         }
 
         /// <inheritdoc />
-        [Pure]
         public bool Equals(Point2D other)
         {
             //// ReSharper disable CompareOfFloatsByEqualityOperator
@@ -409,7 +422,6 @@ namespace MathNet.Spatial.Euclidean
         /// <param name="other">The point to compare against.</param>
         /// <param name="tolerance">A tolerance (epsilon) to adjust for floating point error</param>
         /// <returns>true if the points are equal; otherwise false</returns>
-        [Pure]
         public bool Equals(Point2D other, double tolerance)
         {
             if (tolerance < 0)
@@ -422,7 +434,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <inheritdoc />
-        [Pure]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -434,7 +445,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <inheritdoc />
-        [Pure]
         public override int GetHashCode()
         {
             unchecked
@@ -444,34 +454,20 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema() => null;
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
+        public Point2D Clone()
         {
-            if (reader.TryReadAttributeAsDouble("X", out var x) &&
-                reader.TryReadAttributeAsDouble("Y", out var y))
-            {
-                reader.Skip();
-                this = new Point2D(x, y);
-                return;
-            }
-
-            if (reader.TryReadChildElementsAsDoubles("X", "Y", out x, out y))
-            {
-                reader.Skip();
-                this = new Point2D(x, y);
-                return;
-            }
-
-            throw new XmlException("Could not read a Point2D");
+            return new Point2D(this.x, this.y, this.cs);
         }
 
         /// <inheritdoc />
-        void IXmlSerializable.WriteXml(XmlWriter writer)
+        public void Freeze()
         {
-            writer.WriteAttribute("X", this.X);
-            writer.WriteAttribute("Y", this.Y);
+            if (this.frozen)
+            {
+                throw new InvalidOperationException("Point is already frozen");
+            }
+
+            this.frozen = true;
         }
     }
 }

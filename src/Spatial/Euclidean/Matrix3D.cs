@@ -3,7 +3,7 @@ namespace MathNet.Spatial.Euclidean
     using System;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Numerics.LinearAlgebra.Double;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// Helper class for working with 3D matrixes
@@ -103,21 +103,6 @@ namespace MathNet.Spatial.Euclidean
 
             var signedAngleTo = fromVector.SignedAngleTo(toVector, axis.Value);
             return RotationAroundArbitraryVector(axis.Value, signedAngleTo);
-        }
-
-        /// <summary>
-        /// Creates a rotation matrix around an arbitary vector
-        /// </summary>
-        /// <param name="aboutVector">The vector</param>
-        /// <param name="angle">Angle in degrees</param>
-        /// <param name="angleUnit">The angle unit</param>
-        /// <typeparam name="T">any angle type</typeparam>
-        /// <returns>A transform matrix</returns>
-        [Obsolete("Use Angle instead, Obsolete from 2017-12-12")]
-        public static Matrix<double> RotationAroundArbitraryVector<T>(UnitVector3D aboutVector, double angle, T angleUnit)
-            where T : IAngleUnit
-        {
-            return RotationAroundArbitraryVector(aboutVector, Angle.From(angle, angleUnit));
         }
 
         /// <summary>

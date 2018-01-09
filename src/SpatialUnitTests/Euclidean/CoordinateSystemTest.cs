@@ -2,8 +2,9 @@
 {
     // ReSharper disable InconsistentNaming
     using System;
+    using System.Text.RegularExpressions;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
     using NUnit.Framework;
 
     [TestFixture]
@@ -15,6 +16,16 @@
         private const string NegativeX = "-1; 0; 0";
         private const string NegativeY = "0; -1; 0";
         private const string NegativeZ = "0; 0; -1";
+
+        /// <summary>
+        /// A local regex pattern for 3D items
+        /// </summary>
+        private static readonly string Item3DPattern = Parser.Vector3DPattern.Trim('^', '$');
+
+        /// <summary>
+        /// A local regex pattern for a coordinate system
+        /// </summary>
+        private static readonly string CsPattern = string.Format(@"^ *o: *{{(?<op>{0})}} *x: *{{(?<xv>{0})}} *y: *{{(?<yv>{0})}} *z: *{{(?<zv>{0})}} *$", Item3DPattern);
 
         [TestCase("1, 2, 3", "4, 5, 6", "7, 8, 9", "-1, -2, -3")]
         public void ConstructorTest(string ps, string xs, string ys, string zs)
@@ -40,7 +51,7 @@
         [TestCase("o:{1, 2e-6, -3} x:{1, 2, 3} y:{3, 3, 3} z:{4, 4, 4}", "1, 2e-6, -3", "1, 2, 3", "3, 3, 3", "4, 4, 4")]
         public void ParseTests(string s, string ops, string xs, string ys, string zs)
         {
-            var cs = CoordinateSystem.Parse(s);
+            var cs = Parse(s);
             AssertGeometry.AreEqual(Point3D.Parse(ops), cs.Origin);
             AssertGeometry.AreEqual(Vector3D.Parse(xs), cs.XAxis);
             AssertGeometry.AreEqual(Vector3D.Parse(ys), cs.YAxis);
@@ -157,7 +168,7 @@
         public void TransformPoint(string ps, string eps, string css)
         {
             var p = Point3D.Parse(ps);
-            var cs = CoordinateSystem.Parse(css);
+            var cs = Parse(css);
             var actual = p.TransformBy(cs);
             var expected = Point3D.Parse(eps);
             AssertGeometry.AreEqual(expected, actual, float.Epsilon);
@@ -168,7 +179,7 @@
         public void TransformVector(string vs, string evs, string css)
         {
             var v = Vector3D.Parse(vs);
-            var cs = CoordinateSystem.Parse(css);
+            var cs = Parse(css);
             var actual = cs.Transform(v);
             var expected = Vector3D.Parse(evs);
             AssertGeometry.AreEqual(expected, actual);
@@ -190,8 +201,8 @@
         [TestCase("o:{1, 2, -7} x:{10, 0.1, 0} y:{0, 1.2, 0.1} z:{0.1, 0, 1}", "o:{2, 5, 1} x:{0.1, 2, 0} y:{0.2, -1, 0} z:{0, 0.4, 1}")]
         public void SetToAlignCoordinateSystemsTest(string fcss, string tcss)
         {
-            var fcs = CoordinateSystem.Parse(fcss);
-            var tcs = CoordinateSystem.Parse(tcss);
+            var fcs = Parse(fcss);
+            var tcs = Parse(tcss);
 
             var css = new[]
             {
@@ -244,8 +255,8 @@
         [TestCase("o:{1, 2, -7} x:{10, 0, 0} y:{0, 1, 0} z:{0, 0, 1}", "o:{0, 0, 0} x:{1, 0, 0} y:{0, 1, 0} z:{0, 0, 1}")]
         public void Transform(string cs1s, string cs2s)
         {
-            var cs1 = CoordinateSystem.Parse(cs1s);
-            var cs2 = CoordinateSystem.Parse(cs2s);
+            var cs1 = Parse(cs1s);
+            var cs2 = Parse(cs2s);
             var actual = cs1.Transform(cs2);
             var expected = new CoordinateSystem(cs1.Multiply(cs2));
             AssertGeometry.AreEqual(expected, actual);
@@ -263,6 +274,16 @@
     <ZAxis X=""1"" Y=""0"" Z=""0"" />
 </CoordinateSystem>";
             AssertXml.XmlRoundTrips(cs, expected, (e, a) => AssertGeometry.AreEqual(e, a));
+        }
+
+        private static CoordinateSystem Parse(string s)
+        {
+            var match = Regex.Match(s, CsPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline);
+            var o = Point3D.Parse(match.Groups["op"].Value);
+            var x = Vector3D.Parse(match.Groups["xv"].Value);
+            var y = Vector3D.Parse(match.Groups["yv"].Value);
+            var z = Vector3D.Parse(match.Groups["zv"].Value);
+            return new CoordinateSystem(o, x, y, z);
         }
     }
 }

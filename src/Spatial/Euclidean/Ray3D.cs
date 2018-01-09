@@ -12,8 +12,7 @@ namespace MathNet.Spatial.Euclidean
     /// <summary>
     /// A ray in 3D space
     /// </summary>
-    [Serializable]
-    public struct Ray3D : IEquatable<Ray3D>, IXmlSerializable, IFormattable
+    public struct Ray3D : IEquatable<Ray3D>, IFormattable
     {
         /// <summary>
         /// The start point of the ray
@@ -90,32 +89,6 @@ namespace MathNet.Spatial.Euclidean
         public static Ray3D Parse(string point, string direction)
         {
             return new Ray3D(Point3D.Parse(point), UnitVector3D.Parse(direction));
-        }
-
-        /// <summary>
-        /// Parses a string in the format: 'p:{1, 2, 3} v:{0, 0, 1}' to a Ray3D
-        /// This is mainly meant for tests
-        /// </summary>
-        /// <param name="s">a string representing the ray</param>
-        /// <returns>a ray</returns>
-        [Obsolete("Should not have been made public. Mode Obsolete 2017-12-09")]
-        public static Ray3D Parse(string s)
-        {
-            return Parser.ParseRay3D(s);
-        }
-
-        /// <summary>
-        /// Returns the shortest line from a point to the ray
-        /// </summary>
-        /// <param name="point3D">A point.</param>
-        /// <returns>A line segment from the point to the closest point on the ray</returns>
-        [Pure]
-        [Obsolete("Use ShortestLineTo, Obsolete from 2017-12-11")]
-        public Line3D LineTo(Point3D point3D)
-        {
-            var v = this.ThroughPoint.VectorTo(point3D);
-            var alongVector = v.ProjectOn(this.Direction);
-            return new Line3D(this.ThroughPoint + alongVector, point3D);
         }
 
         /// <summary>
@@ -214,29 +187,6 @@ namespace MathNet.Spatial.Euclidean
                 "ThroughPoint: {0}, Direction: {1}",
                 this.ThroughPoint.ToString(format, formatProvider),
                 this.Direction.ToString(format, formatProvider));
-        }
-
-        /// <inheritdoc/>
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        /// <inheritdoc/>
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            reader.MoveToContent();
-            var e = (XElement)XNode.ReadFrom(reader);
-            this = new Ray3D(
-                Point3D.ReadFrom(e.SingleElement("ThroughPoint").CreateReader()),
-                UnitVector3D.ReadFrom(e.SingleElement("Direction").CreateReader()));
-        }
-
-        /// <inheritdoc/>
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteElement("ThroughPoint", this.ThroughPoint);
-            writer.WriteElement("Direction", this.Direction);
         }
     }
 }

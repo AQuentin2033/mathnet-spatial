@@ -2,7 +2,7 @@
 {
     using System;
     using System.Diagnostics.Contracts;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// This structure represents a line between two points in 3D-space.  It allows for operations such as
@@ -72,8 +72,7 @@
         }
 
         /// <summary>
-        /// Returns a new <see cref="Line2D"/> from a pair of strings which represent points.
-        /// See <see cref="Point2D.Parse(string, IFormatProvider)" /> for details on acceptable formats.
+        /// Returns a new <see cref="LineSegment3D"/> from a pair of strings which represent points.
         /// </summary>
         /// <param name="startPointString">The string representation of the first point.</param>
         /// <param name="endPointString">The string representation of the second point.</param>

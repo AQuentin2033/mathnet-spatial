@@ -1,4 +1,4 @@
-﻿namespace MathNet.Spatial.Units
+﻿namespace MathNet.Spatial
 {
     using System;
     using System.Globalization;

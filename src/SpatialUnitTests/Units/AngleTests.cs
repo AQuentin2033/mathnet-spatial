@@ -2,11 +2,7 @@
 {
     using System;
     using System.Globalization;
-    using System.IO;
-    using System.Threading;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
     using NUnit.Framework;
 
     public class AngleTests
@@ -193,14 +189,6 @@
             Assert.AreEqual(expected, Angle.Parse(text).Degrees);
         }
 
-        [TestCase(@"<Angle Value=""1"" />")]
-        [TestCase(@"<Angle><Value>1</Value></Angle>")]
-        public void ReadFrom(string xml)
-        {
-            var v = Angle.FromRadians(1);
-            Assert.AreEqual(v, Angle.ReadFrom(XmlReader.Create(new StringReader(xml))));
-        }
-
         [Test]
         public void Compare()
         {
@@ -223,80 +211,6 @@
             Assert.AreEqual(expected, toString);
             Assert.IsTrue(angle.Equals(Angle.Parse(toString), Tolerance));
             Assert.IsTrue(angle.Equals(Angle.Parse(toString), Angle.FromRadians(Tolerance)));
-        }
-
-        [TestCase("15°", "F2", "15.00°")]
-        public void ToString(string s, string format, string expected)
-        {
-            var angle = Angle.Parse(s);
-            var toString = angle.ToString(format, CultureInfo.InvariantCulture, AngleUnit.Degrees);
-            Assert.AreEqual(expected, toString);
-            Assert.AreEqual(angle.Radians, Angle.Parse(angle.ToString(format)).Radians, 1E-2);
-            Assert.IsTrue(angle.Equals(Angle.Parse(toString), Tolerance));
-        }
-
-        [TestCase("15°", @"<Angle Value=""0.26179938779914941"" />")]
-        public void XmlRoundTrips(string vs, string xml)
-        {
-            var angle = Angle.Parse(vs);
-            AssertXml.XmlRoundTrips(angle, xml, (e, a) =>
-            {
-                Assert.AreEqual(e.Radians, a.Radians, Tolerance);
-            });
-        }
-
-        [Test]
-        public void XmlContainerRoundtrip()
-        {
-            var container = new AssertXml.Container<Angle>
-            {
-                Value1 = Angle.FromRadians(1),
-                Value2 = Angle.FromRadians(2),
-            };
-            var expected = "<ContainerOfAngle>\r\n" +
-                           "  <Value1 Value=\"1\"></Value1>\r\n" +
-                           "  <Value2 Value=\"2\"></Value2>\r\n" +
-                           "</ContainerOfAngle>";
-            var roundTrip = AssertXml.XmlSerializerRoundTrip(container, expected);
-            Assert.AreEqual(container.Value1, roundTrip.Value1);
-            Assert.AreEqual(container.Value2, roundTrip.Value2);
-        }
-
-        [Test]
-        public void ReadXmlContainerElementValues()
-        {
-            var container = new AssertXml.Container<Angle>
-            {
-                Value1 = Angle.FromRadians(1),
-                Value2 = Angle.FromRadians(2),
-            };
-            var xml = "<ContainerOfAngle>\r\n" +
-                           "  <Value1>1</Value1>\r\n" +
-                           "  <Value2>2</Value2>\r\n" +
-                           "</ContainerOfAngle>";
-            var serializer = new XmlSerializer(typeof(AssertXml.Container<Angle>));
-            using (var reader = new StringReader(xml))
-            {
-                var deserialized = (AssertXml.Container<Angle>)serializer.Deserialize(reader);
-                Assert.AreEqual(container.Value1, deserialized.Value1);
-                Assert.AreEqual(container.Value2, deserialized.Value2);
-            }
-        }
-
-        [TestCase("15°", @"<Angle><Value>0.261799387799149</Value></Angle>")]
-        [TestCase("15°", @"<Angle><Radians>0.261799387799149</Radians></Angle>")]
-        [TestCase("15°", @"<Angle><Degrees>15</Degrees></Angle>")]
-        [TestCase("15°", @"<Angle Radians=""0.26179938779914941"" />")]
-        [TestCase("180°", @"<Angle Degrees=""180"" />")]
-        public void XmlElement(string vs, string xml)
-        {
-            var angle = Angle.Parse(vs);
-            var serializer = new XmlSerializer(typeof(Angle));
-            using (var reader = new StringReader(xml))
-            {
-                var fromElements = (Angle)serializer.Deserialize(reader);
-                Assert.AreEqual(angle.Radians, fromElements.Radians, 1e-6);
-            }
         }
 
         [Test]

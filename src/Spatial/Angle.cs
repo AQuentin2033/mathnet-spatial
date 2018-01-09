@@ -1,17 +1,13 @@
-namespace MathNet.Spatial.Units
+namespace MathNet.Spatial
 {
     using System;
     using System.Globalization;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Spatial.Internals;
 
     /// <summary>
     /// An angle
     /// </summary>
-    [Serializable]
-    public struct Angle : IComparable<Angle>, IEquatable<Angle>, IFormattable, IXmlSerializable
+    public struct Angle : IComparable<Angle>, IEquatable<Angle>, IFormattable
     {
         /// <summary>
         /// The value in radians
@@ -37,32 +33,6 @@ namespace MathNet.Spatial.Units
         /// A lazy loaded string formatter
         /// </summary>
         private static Lazy<AngleFormatProvider> formatter = new Lazy<AngleFormatProvider>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Angle"/> struct.
-        /// </summary>
-        /// <param name="radians">The value in radians.</param>
-        /// <param name="unit">The radians unit.</param>
-        [Obsolete("This constructor will be removed, use factory method FromRadians. Made obsolete 2017-12-03.")]
-        //// ReSharper disable once UnusedMember.Global
-        //// ReSharper disable once UnusedParameter.Local
-        public Angle(double radians, Radians unit)
-        {
-            this.Radians = radians;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Angle"/> struct.
-        /// </summary>
-        /// <param name="value">The value in degrees.</param>
-        /// <param name="unit">The radians unit.</param>
-        [Obsolete("This constructor will be removed, use factory method FromDegrees. Made obsolete 2017-12-03.")]
-        //// ReSharper disable once UnusedMember.Global
-        //// ReSharper disable once UnusedParameter.Local
-        public Angle(double value, Degrees unit)
-        {
-            this.Radians = value * DegToRad;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Angle"/> struct.
@@ -278,20 +248,6 @@ namespace MathNet.Spatial.Units
         /// <summary>
         /// Creates a new instance of Angle.
         /// </summary>
-        /// <typeparam name="T">The type of the unit</typeparam>
-        /// <param name="value">The value</param>
-        /// <param name="unit">the unit</param>
-        /// <returns> A new instance of the <see cref="Angle"/> struct.</returns>
-        [Obsolete("This method will be removed, use factory method FromDegrees or FromRadians. Made obsolete 2017-12-03.")]
-        public static Angle From<T>(double value, T unit)
-            where T : IAngleUnit
-        {
-            return new Angle(value * unit.ConversionFactor);
-        }
-
-        /// <summary>
-        /// Creates a new instance of Angle.
-        /// </summary>
         /// <param name="value">The value in degrees.</param>
         /// <returns> A new instance of the <see cref="Angle"/> struct.</returns>
         public static Angle FromDegrees(double value)
@@ -319,16 +275,6 @@ namespace MathNet.Spatial.Units
         public static Angle FromSexagesimal(int degrees, int minutes, double seconds)
         {
             return Angle.FromDegrees(degrees + (minutes / 60.0F) + (seconds / 3600.0F));
-        }
-
-        /// <summary>
-        /// Creates an <see cref="Angle"/> from an <see cref="XmlReader"/>.
-        /// </summary>
-        /// <param name="reader">An <see cref="XmlReader"/> positioned at the node to read into this <see cref="Angle"/>.</param>
-        /// <returns>An <see cref="Angle"/> that contains the data read from the reader.</returns>
-        public static Angle ReadFrom(XmlReader reader)
-        {
-            return reader.ReadElementAs<Angle>();
         }
 
         /// <summary>
@@ -364,32 +310,6 @@ namespace MathNet.Spatial.Units
         public string ToString(string format, IFormatProvider provider)
         {
             return Angle.Formatter.Format(format, this, provider);
-        }
-
-        /// <summary>
-        /// Returns a string representation of the Angle using the provided <see cref="IFormatProvider"/> using the specified format for a given unit
-        /// </summary>
-        /// <typeparam name="T">The unit type, generic to avoid boxing.</typeparam>
-        /// <param name="format">a string indicating the desired format of the double.</param>
-        /// <param name="provider">A <see cref="IFormatProvider"/></param>
-        /// <param name="unit">Degrees or Radians</param>
-        /// <returns>The string representation of this instance.</returns>
-        [Obsolete("Use other overloads of ToString, obsolete from 2017-12-18")]
-        public string ToString<T>(string format, IFormatProvider provider, T unit)
-            where T : IAngleUnit
-        {
-            if (unit == null ||
-                unit is Radians)
-            {
-                return $"{this.Radians.ToString(format, provider)}\u00A0{unit?.ShortName ?? AngleUnit.Radians.ShortName}";
-            }
-
-            if (unit is Degrees)
-            {
-                return $"{this.Degrees.ToString(format, provider)}{unit.ShortName}";
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unknown unit");
         }
 
         /// <inheritdoc />
@@ -446,67 +366,6 @@ namespace MathNet.Spatial.Units
         public override int GetHashCode()
         {
             return this.Radians.GetHashCode();
-        }
-
-        /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            if (reader.TryReadAttributeAsDouble("Value", out var value) ||
-                reader.TryReadAttributeAsDouble("Radians", out value))
-            {
-                reader.Skip();
-                this = FromRadians(value);
-                return;
-            }
-
-            if (reader.TryReadAttributeAsDouble("Degrees", out value))
-            {
-                reader.Skip();
-                this = FromDegrees(value);
-                return;
-            }
-
-            if (reader.Read())
-            {
-                if (reader.HasValue)
-                {
-                    this = FromRadians(reader.ReadContentAsDouble());
-                    reader.Skip();
-                    return;
-                }
-
-                if (reader.MoveToContent() == XmlNodeType.Element)
-                {
-                    if (reader.TryReadElementContentAsDouble("Value", out value) ||
-                        reader.TryReadElementContentAsDouble("Radians", out value))
-                    {
-                        reader.Skip();
-                        this = FromRadians(value);
-                        return;
-                    }
-
-                    if (reader.TryReadElementContentAsDouble("Degrees", out value))
-                    {
-                        reader.Skip();
-                        this = FromDegrees(value);
-                        return;
-                    }
-                }
-            }
-
-            throw new XmlException("Could not read an Angle");
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttribute("Value", this.Radians);
         }
     }
 }

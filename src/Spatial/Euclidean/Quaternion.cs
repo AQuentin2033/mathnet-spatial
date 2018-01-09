@@ -3,7 +3,6 @@
     using System;
     using Numerics;
     using Numerics.LinearAlgebra.Double;
-    using Units;
 
     /// <summary>Quaternion Number</summary>
     /// <remarks>

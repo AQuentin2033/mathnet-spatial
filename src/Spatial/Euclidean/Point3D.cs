@@ -5,18 +5,15 @@ namespace MathNet.Spatial.Euclidean
     using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra;
+    using MathNet.Spatial;
     using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
 
     /// <summary>
     /// Represents a point in 3 dimensional space
     /// </summary>
     [Serializable]
-    public struct Point3D : IXmlSerializable, IEquatable<Point3D>, IFormattable
+    public struct Point3D : IEquatable<Point3D>, IFormattable
     {
         /// <summary>
         /// The x component.
@@ -44,34 +41,6 @@ namespace MathNet.Spatial.Euclidean
             this.X = x;
             this.Y = y;
             this.Z = z;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Point3D"/> struct.
-        /// Creates a point from a list of coordinates (x, y, z)
-        /// </summary>
-        /// <param name="data">a list of coordinates in the order x, y, z</param>
-        /// <exception cref="ArgumentException">Exception thrown if anything other than 3 coordinates are passed</exception>
-        [Obsolete("This constructor will be removed. Made obsolete 2017-12-05.")]
-        public Point3D(IEnumerable<double> data)
-            : this(data.ToArray())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Point3D"/> struct.
-        /// Creates a point from a list of coordinates (x, y, z)
-        /// </summary>
-        /// <param name="data">a size 3 array of coordinates in the order x, y, z</param>
-        /// <exception cref="ArgumentException">Exception thrown if anything other than 3 coordinates are passed</exception>
-        [Obsolete("This constructor will be removed. Made obsolete 2017-12-05.")]
-        public Point3D(double[] data)
-            : this(data[0], data[1], data[2])
-        {
-            if (data.Length != 3)
-            {
-                throw new ArgumentException("Size must be 3");
-            }
         }
 
         /// <summary>
@@ -244,16 +213,6 @@ namespace MathNet.Spatial.Euclidean
             }
 
             return new Point3D(vector.At(0), vector.At(1), vector.At(2));
-        }
-
-        /// <summary>
-        /// Creates an <see cref="Point3D"/> from an <see cref="XmlReader"/>.
-        /// </summary>
-        /// <param name="reader">An <see cref="XmlReader"/> positioned at the node to read into this <see cref="Point3D"/>.</param>
-        /// <returns>An <see cref="Point3D"/> that contains the data read from the reader.</returns>
-        public static Point3D ReadFrom(XmlReader reader)
-        {
-            return reader.ReadElementAs<Point3D>();
         }
 
         /// <summary>
@@ -505,39 +464,6 @@ namespace MathNet.Spatial.Euclidean
                 hashCode = (hashCode * 397) ^ this.Z.GetHashCode();
                 return hashCode;
             }
-        }
-
-        /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema() => null;
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            if (reader.TryReadAttributeAsDouble("X", out var x) &&
-                reader.TryReadAttributeAsDouble("Y", out var y) &&
-                reader.TryReadAttributeAsDouble("Z", out var z))
-            {
-                reader.Skip();
-                this = new Point3D(x, y, z);
-                return;
-            }
-
-            if (reader.TryReadChildElementsAsDoubles("X", "Y", "Z", out x, out y, out z))
-            {
-                reader.Skip();
-                this = new Point3D(x, y, z);
-                return;
-            }
-
-            throw new XmlException($"Could not read a {this.GetType()}");
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttribute("X", this.X);
-            writer.WriteAttribute("Y", this.Y);
-            writer.WriteAttribute("Z", this.Z);
         }
     }
 }

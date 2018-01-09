@@ -2,11 +2,12 @@ namespace MathNet.Spatial.UnitTests
 {
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
+    using MathNet.Spatial.Euclidean2D;
     using NUnit.Framework;
 
     public static class AssertGeometry
     {
-        public static void AreEqual(CoordinateSystem coordinateSystem, Point3D origin, Vector3D xAxis, Vector3D yAxis, Vector3D zAxis, double tolerance = 1e-6)
+        public static void AreEqual(Spatial.Euclidean.CoordinateSystem coordinateSystem, Point3D origin, Vector3D xAxis, Vector3D yAxis, Vector3D zAxis, double tolerance = 1e-6)
         {
             AreEqual(xAxis, coordinateSystem.XAxis, tolerance);
             AreEqual(yAxis, coordinateSystem.YAxis, tolerance);
@@ -76,7 +77,7 @@ namespace MathNet.Spatial.UnitTests
             Assert.AreEqual(expected.Z, actual.Z, tolerance, message);
         }
 
-        public static void AreEqual(CoordinateSystem expected, CoordinateSystem actual, double tolerance = 1e-6, string message = "")
+        public static void AreEqual(Spatial.Euclidean.CoordinateSystem expected, Spatial.Euclidean.CoordinateSystem actual, double tolerance = 1e-6, string message = "")
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -110,12 +111,6 @@ namespace MathNet.Spatial.UnitTests
             {
                 Assert.AreEqual(expected[i], actual[i], tolerance);
             }
-        }
-
-        public static void AreEqual(Line3D expected, Line3D actual, double tolerance = 1e-6)
-        {
-            AreEqual(expected.StartPoint, actual.StartPoint, tolerance);
-            AreEqual(expected.EndPoint, actual.EndPoint, tolerance);
         }
 
         public static void AreEqual(LineSegment3D expected, LineSegment3D actual, double tolerance = 1e-6)

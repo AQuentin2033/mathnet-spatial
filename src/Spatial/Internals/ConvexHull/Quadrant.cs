@@ -3,45 +3,46 @@
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using MathNet.Spatial.Euclidean2D;
 
     /// <summary>
     /// An avl node for convex hull representing a quadrant
     /// </summary>
     [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "By design")]
     [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1306:FieldNamesMustBeginWithLowerCaseLetter", Justification = "Reviewed.")]
-    internal abstract class Quadrant : AvlTreeSet<MutablePoint>
+    internal abstract class Quadrant : AvlTreeSet<Point2D>
     {
         /// <summary>
         /// The first point
         /// </summary>
-        public MutablePoint FirstPoint;
+        public Point2D FirstPoint;
 
         /// <summary>
         /// The last point
         /// </summary>
-        public MutablePoint LastPoint;
+        public Point2D LastPoint;
 
         /// <summary>
         /// The root point
         /// </summary>
-        public MutablePoint RootPoint;
+        public Point2D RootPoint;
 
         /// <summary>
         /// The current node
         /// </summary>
-        protected AvlNode<MutablePoint> CurrentNode = null;
+        protected AvlNode<Point2D> CurrentNode = null;
 
         /// <summary>
         /// A list of points
         /// </summary>
-        protected MutablePoint[] ListOfPoint;
+        protected Point2D[] ListOfPoint;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Quadrant"/> class.
         /// </summary>
         /// <param name="listOfPoint">a list of points</param>
         /// <param name="comparer">Comparer is only used to add the second point (the last point, which is compared against the first one).</param>
-        internal Quadrant(MutablePoint[] listOfPoint, IComparer<MutablePoint> comparer)
+        internal Quadrant(Point2D[] listOfPoint, IComparer<Point2D> comparer)
             : base(comparer)
         {
             this.ListOfPoint = listOfPoint;
@@ -93,7 +94,7 @@
         /// Tell if should try to add and where. -1 ==> Should not add.
         /// </summary>
         /// <param name="point">A point</param>
-        internal abstract void ProcessPoint(ref MutablePoint point);
+        internal abstract void ProcessPoint(ref Point2D point);
 
         /// <summary>
         /// Initialize every values needed to extract values that are parts of the convex hull.
@@ -110,7 +111,7 @@
         /// <returns>Equivalent of tracing a line from p1 to p2 and tell if ptToCheck
         /// is to the right or left of that line taking p1 as reference point.</returns>
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected bool IsPointToTheRightOfOthers(MutablePoint p1, MutablePoint p2, MutablePoint pointtToCheck)
+        protected bool IsPointToTheRightOfOthers(Point2D p1, Point2D p2, Point2D pointtToCheck)
         {
             return ((p2.X - p1.X) * (pointtToCheck.Y - p1.Y)) - ((p2.Y - p1.Y) * (pointtToCheck.X - p1.X)) < 0;
         }
@@ -121,7 +122,7 @@
         /// <param name="pt">a point</param>
         /// <returns>True if it is a good quadrant for the point; otherwise false</returns>
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected abstract bool IsGoodQuadrantForPoint(MutablePoint pt);
+        protected abstract bool IsGoodQuadrantForPoint(Point2D pt);
 
         /// <summary>
         /// Called after insertion in order to see if the newly added point invalidate one
@@ -132,13 +133,13 @@
         /// <param name="pointNext">Next point</param>
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1002:SemicolonsMustBeSpacedCorrectly", Justification = "Reviewed.")]
-        protected void InvalidateNeighbors(AvlNode<MutablePoint> pointPrevious, AvlNode<MutablePoint> pointNew, AvlNode<MutablePoint> pointNext)
+        protected void InvalidateNeighbors(AvlNode<Point2D> pointPrevious, AvlNode<Point2D> pointNew, AvlNode<Point2D> pointNext)
         {
             bool invalidPoint;
 
             if (pointPrevious != null)
             {
-                AvlNode<MutablePoint> previousPrevious = pointPrevious.GetPreviousNode();
+                AvlNode<Point2D> previousPrevious = pointPrevious.GetPreviousNode();
                 for (; ;)
                 {
                     if (previousPrevious == null)
@@ -152,7 +153,7 @@
                         break;
                     }
 
-                    MutablePoint pointPrevPrev = previousPrevious.Item;
+                    Point2D pointPrevPrev = previousPrevious.Item;
                     this.RemoveNode(pointPrevious);
                     pointPrevious = this.GetNode(pointPrevPrev);
                     previousPrevious = pointPrevious.GetPreviousNode();
@@ -162,7 +163,7 @@
             // Invalidate next(s)
             if (pointNext != null)
             {
-                AvlNode<MutablePoint> nextNext = pointNext.GetNextNode();
+                AvlNode<Point2D> nextNext = pointNext.GetNextNode();
                 for (; ;)
                 {
                     if (nextNext == null)
@@ -176,7 +177,7 @@
                         break;
                     }
 
-                    MutablePoint pointNextNext = nextNext.Item;
+                    Point2D pointNextNext = nextNext.Item;
                     this.RemoveNode(pointNext);
                     pointNext = this.GetNode(pointNextNext);
                     nextNext = pointNext.GetNextNode();

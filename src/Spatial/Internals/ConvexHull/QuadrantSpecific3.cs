@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using MathNet.Spatial.Euclidean2D;
 
     /// <summary>
     /// Class to process quadrant 3
@@ -13,7 +14,7 @@
         /// </summary>
         /// <param name="listOfPoint">a list of points</param>
         /// <param name="comparer">a comparer</param>
-        internal QuadrantSpecific3(MutablePoint[] listOfPoint, Func<MutablePoint, MutablePoint, int> comparer)
+        internal QuadrantSpecific3(Point2D[] listOfPoint, Func<Point2D, Point2D, int> comparer)
             : base(listOfPoint, new QComparer(comparer))
         {
         }
@@ -25,7 +26,7 @@
         /// <param name="pointHull">a point on the hull</param>
         /// <returns>True if can quickly reject; otherwise false</returns>
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool CanQuickReject(ref MutablePoint point, ref MutablePoint pointHull)
+        internal static bool CanQuickReject(ref Point2D point, ref Point2D pointHull)
         {
             return point.X >= pointHull.X && point.Y >= pointHull.Y;
         }
@@ -36,11 +37,11 @@
         /// </summary>
         /// <param name="point">a point</param>
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override void ProcessPoint(ref MutablePoint point)
+        internal override void ProcessPoint(ref Point2D point)
         {
             this.CurrentNode = this.Root;
-            AvlNode<MutablePoint> currentPrevious = null;
-            AvlNode<MutablePoint> currentNext = null;
+            AvlNode<Point2D> currentPrevious = null;
+            AvlNode<Point2D> currentNext = null;
 
             while (this.CurrentNode != null)
             {
@@ -153,7 +154,7 @@
                 }
 
                 // Should insert but no invalidation is required. (That's why we need to insert... can't replace an adjacent neightbor)
-                AvlNode<MutablePoint> newNode = new AvlNode<MutablePoint>();
+                AvlNode<Point2D> newNode = new AvlNode<Point2D>();
                 if (insertionSide == Side.Right)
                 {
                     newNode.Parent = this.CurrentNode;
@@ -179,7 +180,7 @@
         /// <inheritdoc />
         protected override void SetQuadrantLimits()
         {
-            MutablePoint firstPoint = this.ListOfPoint.First();
+            Point2D firstPoint = this.ListOfPoint.First();
 
             double leftX = firstPoint.X;
             double leftY = firstPoint.Y;
@@ -222,14 +223,14 @@
                 }
             }
 
-            this.FirstPoint = new MutablePoint(leftX, leftY);
-            this.LastPoint = new MutablePoint(bottomX, bottomY);
-            this.RootPoint = new MutablePoint(bottomX, leftY);
+            this.FirstPoint = new Point2D(leftX, leftY);
+            this.LastPoint = new Point2D(bottomX, bottomY);
+            this.RootPoint = new Point2D(bottomX, leftY);
         }
 
         /// <inheritdoc />
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override bool IsGoodQuadrantForPoint(MutablePoint pt)
+        protected override bool IsGoodQuadrantForPoint(Point2D pt)
         {
             if (pt.X < this.RootPoint.X && pt.Y < this.RootPoint.Y)
             {

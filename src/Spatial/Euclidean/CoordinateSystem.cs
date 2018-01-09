@@ -2,31 +2,15 @@ namespace MathNet.Spatial.Euclidean
 {
     using System;
     using System.Linq;
-    using System.Text.RegularExpressions;
-    using System.Xml;
-    using System.Xml.Linq;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra;
+    using MathNet.Spatial;
     using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
 
     /// <summary>
     /// A coordinate system
     /// </summary>
-    [Serializable]
-    public class CoordinateSystem : Numerics.LinearAlgebra.Double.DenseMatrix, IEquatable<CoordinateSystem>, IXmlSerializable
+    public class CoordinateSystem : Numerics.LinearAlgebra.Double.DenseMatrix, IEquatable<CoordinateSystem>
     {
-        /// <summary>
-        /// A local regex pattern for 3D items
-        /// </summary>
-        private static readonly string Item3DPattern = Parser.Vector3DPattern.Trim('^', '$');
-
-        /// <summary>
-        /// A local regex pattern for a coordinate system
-        /// </summary>
-        private static readonly string CsPattern = string.Format(@"^ *o: *{{(?<op>{0})}} *x: *{{(?<xv>{0})}} *y: *{{(?<yv>{0})}} *z: *{{(?<zv>{0})}} *$", Item3DPattern);
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CoordinateSystem"/> class.
         /// </summary>
@@ -85,7 +69,7 @@ namespace MathNet.Spatial.Euclidean
         /// </summary>
         /// <param name="matrix">A matrix</param>
         public CoordinateSystem(Matrix<double> matrix)
-            : base(4, 4, matrix.ToColumnWiseArray())
+            : base(4, 4, matrix.AsColumnMajorArray())
         {
             if (matrix.RowCount != 4)
             {
@@ -105,7 +89,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 0, 1).ToRowWiseArray();
+                var row = this.SubMatrix(0, 3, 0, 1).AsRowMajorArray();
                 return new Vector3D(row[0], row[1], row[2]);
             }
         }
@@ -117,7 +101,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 1, 1).ToRowWiseArray();
+                var row = this.SubMatrix(0, 3, 1, 1).AsRowMajorArray();
                 return new Vector3D(row[0], row[1], row[2]);
             }
         }
@@ -129,7 +113,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 2, 1).ToRowWiseArray();
+                var row = this.SubMatrix(0, 3, 2, 1).AsRowMajorArray();
                 return new Vector3D(row[0], row[1], row[2]);
             }
         }
@@ -141,7 +125,7 @@ namespace MathNet.Spatial.Euclidean
         {
             get
             {
-                var row = this.SubMatrix(0, 3, 3, 1).ToRowWiseArray();
+                var row = this.SubMatrix(0, 3, 3, 1).AsRowMajorArray();
                 return new Point3D(row[0], row[1], row[2]);
             }
         }
@@ -191,21 +175,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <summary>
-        /// Creates a coordinate system from a string
-        /// </summary>
-        /// <param name="s">The string</param>
-        /// <returns>A coordinate system</returns>
-        public static CoordinateSystem Parse(string s)
-        {
-            var match = Regex.Match(s, CsPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline);
-            var o = Point3D.Parse(match.Groups["op"].Value);
-            var x = Vector3D.Parse(match.Groups["xv"].Value);
-            var y = Vector3D.Parse(match.Groups["yv"].Value);
-            var z = Vector3D.Parse(match.Groups["zv"].Value);
-            return new CoordinateSystem(o, x, y, z);
-        }
-
-        /// <summary>
         /// Sets to the matrix of rotation that aligns the 'from' vector with the 'to' vector.
         /// The optional Axis argument may be used when the two vectors are perpendicular and in opposite directions to specify a specific solution, but is otherwise ignored.
         /// </summary>
@@ -219,36 +188,6 @@ namespace MathNet.Spatial.Euclidean
             var coordinateSystem = new CoordinateSystem();
             var cs = SetRotationSubMatrix(r, coordinateSystem);
             return cs;
-        }
-
-        /// <summary>
-        /// Creates a coordinate system that rotates
-        /// </summary>
-        /// <param name="a">Angle to rotate</param>
-        /// <param name="unit">The unit of the angle</param>
-        /// <param name="v">Vector to rotate about</param>
-        /// <typeparam name="T">A type of angle unit</typeparam>
-        /// <returns>A coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public static CoordinateSystem Rotation<T>(double a, T unit, UnitVector3D v)
-            where T : IAngleUnit
-        {
-            return Rotation(Angle.From(a, unit), v);
-        }
-
-        /// <summary>
-        /// Creates a coordinate system that rotates
-        /// </summary>
-        /// <param name="a">Angle to rotate</param>
-        /// <param name="unit">The unit of the angle</param>
-        /// <param name="v">Vector to rotate about</param>
-        /// <typeparam name="T">A type of angle unit</typeparam>
-        /// <returns>A coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public static CoordinateSystem Rotation<T>(double a, T unit, Vector3D v)
-            where T : IAngleUnit
-        {
-            return Rotation(Angle.From(a, unit), v.Normalize());
         }
 
         /// <summary>
@@ -283,26 +222,6 @@ namespace MathNet.Spatial.Euclidean
         /// <param name="yaw">Rotates around Z</param>
         /// <param name="pitch">Rotates around Y</param>
         /// <param name="roll">Rotates around X</param>
-        /// <param name="unit">A type of angle unit</param>
-        /// <typeparam name="T">Any angle type</typeparam>
-        /// <returns>A rotated coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public static CoordinateSystem Rotation<T>(double yaw, double pitch, double roll, T unit)
-            where T : IAngleUnit
-        {
-            var ya = Angle.From(yaw, unit);
-            var ra = Angle.From(roll, unit);
-            var pa = Angle.From(pitch, unit);
-            return Rotation(ya, pa, ra);
-        }
-
-        /// <summary>
-        /// Rotation around Z (yaw) then around Y (pitch) and then around X (roll)
-        /// http://en.wikipedia.org/wiki/Aircraft_principal_axes
-        /// </summary>
-        /// <param name="yaw">Rotates around Z</param>
-        /// <param name="pitch">Rotates around Y</param>
-        /// <param name="roll">Rotates around X</param>
         /// <returns>A rotated coordinate system</returns>
         public static CoordinateSystem Rotation(Angle yaw, Angle pitch, Angle roll)
         {
@@ -311,20 +230,6 @@ namespace MathNet.Spatial.Euclidean
             var pt = Pitch(pitch);
             var rt = Roll(roll);
             return rt.Transform(pt.Transform(yt.Transform(cs)));
-        }
-
-        /// <summary>
-        /// Rotates around Z
-        /// </summary>
-        /// <typeparam name="T">any angle type</typeparam>
-        /// <param name="a">An angle</param>
-        /// <param name="unit">An angle unit</param>
-        /// <returns>A rotated coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public static CoordinateSystem Yaw<T>(double a, T unit)
-            where T : IAngleUnit
-        {
-            return Yaw(Angle.From(a, unit));
         }
 
         /// <summary>
@@ -340,39 +245,11 @@ namespace MathNet.Spatial.Euclidean
         /// <summary>
         /// Rotates around Y
         /// </summary>
-        /// <param name="a">An angle</param>
-        /// <param name="unit">An angle unit</param>
-        /// <typeparam name="T">Any angle type</typeparam>
-        /// <returns>A rotated coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public static CoordinateSystem Pitch<T>(double a, T unit)
-            where T : IAngleUnit
-        {
-            return Pitch(Angle.From(a, unit));
-        }
-
-        /// <summary>
-        /// Rotates around Y
-        /// </summary>
         /// <param name="av">An angle</param>
         /// <returns>A rotated coordinate system</returns>
         public static CoordinateSystem Pitch(Angle av)
         {
             return Rotation(av, UnitVector3D.YAxis);
-        }
-
-        /// <summary>
-        /// Rotates around X
-        /// </summary>
-        /// <param name="a">An angle</param>
-        /// <param name="unit">An angle unit</param>
-        /// <typeparam name="T">any angle type</typeparam>
-        /// <returns>A rotated coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public static CoordinateSystem Roll<T>(double a, T unit)
-            where T : IAngleUnit
-        {
-            return Roll(Angle.From(a, unit));
         }
 
         /// <summary>
@@ -478,21 +355,6 @@ namespace MathNet.Spatial.Euclidean
         /// <summary>
         /// Rotates a coordinate system around a vector
         /// </summary>
-        /// <typeparam name="T">Any angle type</typeparam>
-        /// <param name="aboutVector3D">The vector</param>
-        /// <param name="angle">An angle</param>
-        /// <param name="angleUnit">An angle unit</param>
-        /// <returns>A rotated coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public CoordinateSystem RotateCoordSysAroundVector<T>(Vector3D aboutVector3D, double angle, T angleUnit)
-            where T : IAngleUnit
-        {
-            return this.RotateCoordSysAroundVector(aboutVector3D.Normalize(), Angle.From(angle, angleUnit));
-        }
-
-        /// <summary>
-        /// Rotates a coordinate system around a vector
-        /// </summary>
         /// <param name="about">The vector</param>
         /// <param name="angle">An angle</param>
         /// <returns>A rotated coordinate system</returns>
@@ -500,22 +362,6 @@ namespace MathNet.Spatial.Euclidean
         {
             var rcs = Rotation(angle, about);
             return rcs.Transform(this);
-        }
-
-        /// <summary>
-        /// Rotate without Reset
-        /// </summary>
-        /// <typeparam name="T">Any angle type</typeparam>
-        /// <param name="yaw">The yaw</param>
-        /// <param name="pitch">The pitch</param>
-        /// <param name="roll">The roll</param>
-        /// <param name="unit">The angle unit</param>
-        /// <returns>A rotated coordinate system</returns>
-        [Obsolete("This method will be removed, use the overload that takes an angle. Made obsolete 2017-12-06.")]
-        public CoordinateSystem RotateNoReset<T>(double yaw, double pitch, double roll, T unit)
-            where T : IAngleUnit
-        {
-            return this.RotateNoReset(Angle.From(yaw, unit), Angle.From(pitch, unit), Angle.From(roll, unit));
         }
 
         /// <summary>
@@ -683,17 +529,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <summary>
-        /// Transforms a line and returns the transformed.
-        /// </summary>
-        /// <param name="l">A line</param>
-        /// <returns>A transformed line</returns>
-        [Obsolete("Use LineSegment3D, Obsolete from 2017-12-10")]
-        public Line3D Transform(Line3D l)
-        {
-            return new Line3D(this.Transform(l.StartPoint), this.Transform(l.EndPoint));
-        }
-
-        /// <summary>
         /// Transforms a line segement.
         /// </summary>
         /// <param name="l">A line segment</param>
@@ -804,39 +639,6 @@ namespace MathNet.Spatial.Euclidean
         public new string ToString()
         {
             return string.Format("Origin: {0}, XAxis: {1}, YAxis: {2}, ZAxis: {3}", this.Origin, this.XAxis, this.YAxis, this.ZAxis);
-        }
-
-        /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            var e = (XElement)XNode.ReadFrom(reader);
-
-            var xAxis = Vector3D.ReadFrom(e.SingleElementReader("XAxis"));
-            this.SetColumn(0, new[] { xAxis.X, xAxis.Y, xAxis.Z, 0 });
-
-            var yAxis = Vector3D.ReadFrom(e.SingleElementReader("YAxis"));
-            this.SetColumn(1, new[] { yAxis.X, yAxis.Y, yAxis.Z, 0 });
-
-            var zAxis = Vector3D.ReadFrom(e.SingleElementReader("ZAxis"));
-            this.SetColumn(2, new[] { zAxis.X, zAxis.Y, zAxis.Z, 0 });
-
-            var origin = Point3D.ReadFrom(e.SingleElementReader("Origin"));
-            this.SetColumn(3, new[] { origin.X, origin.Y, origin.Z, 1 });
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteElement("Origin", this.Origin);
-            writer.WriteElement("XAxis", this.XAxis);
-            writer.WriteElement("YAxis", this.YAxis);
-            writer.WriteElement("ZAxis", this.ZAxis);
         }
     }
 }

@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics.Contracts;
     using MathNet.Numerics;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// A means of representing spatial orientation of any reference frame.

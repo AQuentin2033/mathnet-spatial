@@ -1,14 +1,43 @@
 ﻿namespace MathNet.Spatial.Serialization.Xml.UnitTests
 {
     using System.Linq;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial.Euclidean2D;
     using MathNet.Spatial.UnitTests;
     using NUnit.Framework;
 
     public class XmlSerializaerTests
     {
         private const double Tolerance = 1e-6;
+
+        [Explicit("fix later")]
+        [Test]
+        public void XmlContainerRoundtrip()
+        {
+            var container = new AssertXml.Container<Angle>
+            {
+                Value1 = Angle.FromRadians(1),
+                Value2 = Angle.FromRadians(2),
+            };
+            var expected = "<ContainerOfAngle>\r\n" +
+                           "  <Value1 Value=\"1\"></Value1>\r\n" +
+                           "  <Value2 Value=\"2\"></Value2>\r\n" +
+                           "</ContainerOfAngle>";
+            var roundTrip = AssertXml.XmlSerializerRoundTrip(container, expected);
+            Assert.AreEqual(container.Value1, roundTrip.Value1);
+            Assert.AreEqual(container.Value2, roundTrip.Value2);
+        }
+
+        [TestCase("15°", @"<Angle Value=""0.26179938779914941"" />")]
+        public void XmlRoundTrips(string vs, string xml)
+        {
+            var angle = Angle.Parse(vs);
+            AssertXml.XmlRoundTrips(angle, xml, (e, a) =>
+            {
+                Assert.AreEqual(e.Radians, a.Radians, Tolerance);
+            });
+        }
 
         [Explicit("fix later")]
         [TestCase("1, 2, 3", "-1, 2, 3", false, @"<Ray3D><ThroughPoint X=""1"" Y=""2"" Z=""3"" /><Direction X=""-0.2672612419124244"" Y=""0.53452248382484879"" Z=""0.80178372573727319"" /></Ray3D>")]
@@ -18,27 +47,6 @@
             var result = AssertXml.XmlSerializerRoundTrip(ray, xml);
             Assert.AreEqual(ray, result);
             AssertGeometry.AreEqual(ray, result, Tolerance);
-        }
-
-        [TestCase("1, 2, 3", "4, 5, 6", @"<Line3D><StartPoint X=""1"" Y=""2"" Z=""3"" /><EndPoint X=""4"" Y=""5"" Z=""6"" /></Line3D>")]
-        public void Line3DXml(string p1s, string p2s, string xml)
-        {
-            Point3D p1 = Point3D.Parse(p1s);
-            Point3D p2 = Point3D.Parse(p2s);
-            var l = new Line3D(p1, p2);
-            var result = AssertXml.XmlSerializerRoundTrip(l, xml);
-            Assert.AreEqual(l, result);
-        }
-
-        [Explicit("fix later")]
-        [TestCase("1, 2", "4, 5", @"<Line2D><StartPoint X=""1"" Y=""2"" /><EndPoint X=""4"" Y=""5"" /></Line2D>")]
-        public void Line2DXml(string p1s, string p2s, string xml)
-        {
-            Point2D p1 = Point2D.Parse(p1s);
-            Point2D p2 = Point2D.Parse(p2s);
-            var l = new Line2D(p1, p2);
-            var result = AssertXml.XmlSerializerRoundTrip(l, xml);
-            Assert.AreEqual(l, result);
         }
 
         [Explicit("fix later")]
@@ -192,7 +200,7 @@
         [Test]
         public void CoordinateSystemXml()
         {
-            var cs = new CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
+            var cs = new Euclidean.CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
             string xml = @"
 <CoordinateSystem>
     <Origin X=""1"" Y=""-2"" Z=""3"" />

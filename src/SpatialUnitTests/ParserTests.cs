@@ -4,7 +4,7 @@
     using System.Globalization;
     using System.Text.RegularExpressions;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial.UnitTests.Euclidean;
     using NUnit.Framework;
 
     public class ParserTests

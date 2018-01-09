@@ -1,7 +1,7 @@
 ﻿namespace MathNet.Spatial.UnitTests.Euclidean
 {
     using System;
-    using MathNet.Spatial.Euclidean;
+    using MathNet.Spatial.Euclidean2D;
     using NUnit.Framework;
 
     [TestFixture]

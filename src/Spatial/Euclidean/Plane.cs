@@ -2,19 +2,13 @@
 {
     using System;
     using System.Diagnostics.Contracts;
-    using System.Xml;
-    using System.Xml.Linq;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra.Double;
-    using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// A geometric plane
     /// </summary>
-    [Serializable]
-    public struct Plane : IEquatable<Plane>, IXmlSerializable
+    public struct Plane : IEquatable<Plane>
     {
         /// <summary>
         /// The normal vector of the Plane.
@@ -159,17 +153,6 @@
         }
 
         /// <summary>
-        /// Creates a Plane from its string representation
-        /// </summary>
-        /// <param name="s">The string representation of the Plane</param>
-        /// <returns>a new Plane</returns>
-        [Obsolete("Should not have been made public, removed on 9/12/2017")]
-        public static Plane Parse(string s)
-        {
-            return Parser.ParsePlane(s);
-        }
-
-        /// <summary>
         /// Get the distance to the point along the <see cref="Normal"/>
         /// </summary>
         /// <param name="point">The <see cref="Point3D"/></param>
@@ -240,19 +223,6 @@
             var projectiononNormal = projectionDirection == null ? this.Normal : projectionDirection.Value;
             var projectionVector = (dotProduct + this.D) * projectiononNormal;
             return p - projectionVector;
-        }
-
-        /// <summary>
-        /// Projects a line onto the plane
-        /// </summary>
-        /// <param name="line3DToProject">The line to project</param>
-        /// <returns>A projected line</returns>
-        [Obsolete("Use LineSegment3D instead, obsolete from 2017-12-10")]
-        public Line3D Project(Line3D line3DToProject)
-        {
-            var projectedStartPoint = this.Project(line3DToProject.StartPoint);
-            var projectedEndPoint = this.Project(line3DToProject.EndPoint);
-            return new Line3D(projectedStartPoint, projectedEndPoint);
         }
 
         /// <summary>
@@ -334,41 +304,6 @@
             var throughPoint = Point3D.OfVector(pointOnIntersectionLine.Column(0));
             var direction = UnitVector3D.OfVector(svd.VT.Row(2));
             return new Ray3D(throughPoint, direction);
-        }
-
-        /// <summary>
-        /// Find intersection between Line3D and Plane
-        /// http://geomalgorithms.com/a05-_intersect-1.html
-        /// </summary>
-        /// <param name="line">A line segment</param>
-        /// <param name="tolerance">A tolerance (epsilon) to account for floating point error.</param>
-        /// <returns>Intersection Point or null</returns>
-        [Obsolete("Use LineSegment3D instead, Obsolete from 2017-12-10")]
-        public Point3D? IntersectionWith(Line3D line, double tolerance = float.Epsilon)
-        {
-            if (line.Direction.IsPerpendicularTo(this.Normal, tolerance))
-            {
-                // either parallel or lies in the plane
-                var projectedPoint = this.Project(line.StartPoint, line.Direction);
-                if (projectedPoint == line.StartPoint)
-                {
-                    throw new InvalidOperationException("Line lies in the plane");
-                }
-
-                // Line and plane are parallel
-                return null;
-            }
-
-            var d = this.SignedDistanceTo(line.StartPoint);
-            var u = line.StartPoint.VectorTo(line.EndPoint);
-            var t = -1 * d / u.DotProduct(this.Normal);
-            if (t > 1 || t < 0)
-            {
-                // They are not intersected
-                return null;
-            }
-
-            return line.StartPoint + (t * u);
         }
 
         /// <summary>
@@ -491,29 +426,6 @@
         public override string ToString()
         {
             return $"A:{Math.Round(this.A, 4)} B:{Math.Round(this.B, 4)} C:{Math.Round(this.C, 4)} D:{Math.Round(this.D, 4)}";
-        }
-
-        /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            reader.MoveToContent();
-            var e = (XElement)XNode.ReadFrom(reader);
-            this = new Plane(
-                UnitVector3D.ReadFrom(e.SingleElement("Normal").CreateReader()),
-                Point3D.ReadFrom(e.SingleElement("RootPoint").CreateReader()));
-        }
-
-        /// <inheritdoc/>
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteElement("RootPoint", this.RootPoint);
-            writer.WriteElement("Normal", this.Normal);
         }
     }
 }

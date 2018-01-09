@@ -2,12 +2,8 @@
 namespace MathNet.Spatial.UnitTests.Euclidean
 {
     using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Xml;
-    using System.Xml.Serialization;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
     using NUnit.Framework;
 
     [TestFixture]
@@ -79,21 +75,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
         {
             Assert.AreEqual(false, Vector3D.TryParse(text, out _));
             Assert.Throws<FormatException>(() => Vector3D.Parse(text));
-        }
-
-        [TestCase("<Vector3D X=\"1\" Y=\"-2\" Z=\"3\" />")]
-        [TestCase("<Vector3D Y=\"-2\" Z=\"3\"  X=\"1\"/>")]
-        [TestCase("<Vector3D Z=\"3\" X=\"1\" Y=\"-2\" />")]
-        [TestCase("<Vector3D><X>1</X><Y>-2</Y><Z>3</Z></Vector3D>")]
-        [TestCase("<Vector3D><Y>-2</Y><Z>3</Z><X>1</X></Vector3D>")]
-        [TestCase("<Vector3D><Z>3</Z><X>1</X><Y>-2</Y></Vector3D>")]
-        public void ReadFrom(string xml)
-        {
-            using (var reader = new StringReader(xml))
-            {
-                var actual = Vector3D.ReadFrom(XmlReader.Create(reader));
-                Assert.AreEqual(new Vector3D(1, -2, 3), actual);
-            }
         }
 
         [Test]
@@ -441,52 +422,6 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             var actual = v.ToString(format);
             Assert.AreEqual(expected, actual);
             AssertGeometry.AreEqual(v, Vector3D.Parse(actual), tolerance);
-        }
-
-        [Test]
-        public void XmlRoundtrip()
-        {
-            var p = new Vector3D(1, -2, 3);
-            var xml = @"<Vector3D X=""1"" Y=""-2"" Z=""3"" />";
-            AssertXml.XmlRoundTrips(p, xml, (expected, actual) => AssertGeometry.AreEqual(expected, actual));
-        }
-
-        [Test]
-        public void XmlContainerRoundtrip()
-        {
-            var container = new AssertXml.Container<Vector3D>
-            {
-                Value1 = new Vector3D(1, 2, 3),
-                Value2 = new Vector3D(4, 5, 6)
-            };
-            var expected = "<ContainerOfVector3D>\r\n" +
-                           "  <Value1 X=\"1\" Y=\"2\" Z=\"3\"></Value1>\r\n" +
-                           "  <Value2 X=\"4\" Y=\"5\" Z=\"6\"></Value2>\r\n" +
-                           "</ContainerOfVector3D>";
-            var roundTrip = AssertXml.XmlSerializerRoundTrip(container, expected);
-            AssertGeometry.AreEqual(container.Value1, roundTrip.Value1);
-            AssertGeometry.AreEqual(container.Value2, roundTrip.Value2);
-        }
-
-        [Test]
-        public void XmlElements()
-        {
-            var v = new Vector3D(1, 2, 3);
-            var serializer = new XmlSerializer(typeof(Vector3D));
-            AssertGeometry.AreEqual(v, (Vector3D)serializer.Deserialize(new StringReader(@"<Vector3D><X>1</X><Y>2</Y><Z>3</Z></Vector3D>")));
-        }
-
-        [Test]
-        public void XmlContainerElements()
-        {
-            var xml = "<ContainerOfVector3D>\r\n" +
-                      "  <Value1><X>1</X><Y>2</Y><Z>3</Z></Value1>\r\n" +
-                      "  <Value2><X>4</X><Y>5</Y><Z>6</Z></Value2>\r\n" +
-                      "</ContainerOfVector3D>";
-            var serializer = new XmlSerializer(typeof(AssertXml.Container<Vector3D>));
-            var deserialized = (AssertXml.Container<Vector3D>)serializer.Deserialize(new StringReader(xml));
-            AssertGeometry.AreEqual(new Vector3D(1, 2, 3), deserialized.Value1);
-            AssertGeometry.AreEqual(new Vector3D(4, 5, 6), deserialized.Value2);
         }
     }
 }

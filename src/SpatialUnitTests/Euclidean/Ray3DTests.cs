@@ -48,12 +48,5 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             Assert.AreEqual(expected, ray1 == ray2);
             Assert.AreEqual(!expected, ray1 != ray2);
         }
-
-        [TestCase("1, 2, 3", "-0.2672612419124244, 0.53452248382484879, 0.80178372573727319", false, @"<Ray3D><ThroughPoint X=""1"" Y=""2"" Z=""3"" /><Direction X=""-0.2672612419124244"" Y=""0.53452248382484879"" Z=""0.80178372573727319"" /></Ray3D>")]
-        public void XmlTests(string ps, string vs, bool asElements, string xml)
-        {
-            var ray = new Ray3D(Point3D.Parse(ps), UnitVector3D.Parse(vs));
-            AssertXml.XmlRoundTrips(ray, xml, (e, a) => AssertGeometry.AreEqual(e, a, 1e-6));
-        }
     }
 }

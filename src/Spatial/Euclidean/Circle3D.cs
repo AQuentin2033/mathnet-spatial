@@ -6,7 +6,6 @@
     /// <summary>
     /// Describes a 3 dimensional circle
     /// </summary>
-    [Serializable]
     public struct Circle3D : IEquatable<Circle3D>
     {
         /// <summary>

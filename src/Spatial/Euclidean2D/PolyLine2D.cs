@@ -1,4 +1,4 @@
-﻿namespace MathNet.Spatial.Euclidean
+﻿namespace MathNet.Spatial.Euclidean2D
 {
     using System;
     using System.Collections;

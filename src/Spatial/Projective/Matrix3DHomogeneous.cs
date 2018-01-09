@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics.CodeAnalysis;
     using MathNet.Numerics.LinearAlgebra.Double;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial;
 
     /// <summary>
     /// An implementation of Matrix3DHomogeneous

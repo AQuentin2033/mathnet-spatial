@@ -1,14 +1,13 @@
 ﻿namespace MathNet.Spatial.Serialization.Xml.UnitTests
 {
-#if NETCOREAPP1_1 == false
-
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Xml;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial.Euclidean2D;
     using MathNet.Spatial.UnitTests;
     using NUnit.Framework;
 
@@ -16,7 +15,6 @@
     {
         private const double Tolerance = 1e-6;
 
-        [Explicit("fix later")]
         [TestCase("15 °", @"<Angle><Value>0.26179938779914941</Value></Angle>")]
         public void AngleDataContract(string vs, string xml)
         {
@@ -25,7 +23,6 @@
             Assert.AreEqual(angle.Radians, result.Radians, Tolerance);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Point2DDataContract()
         {
@@ -35,7 +32,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Point3DDataContract()
         {
@@ -45,7 +41,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void QuaternionDataContract()
         {
@@ -55,7 +50,6 @@
             Assert.AreEqual(q, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void EulerAnglesDataContract()
         {
@@ -66,7 +60,6 @@
             Assert.AreEqual(eulerAngles, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("0, 0, 0", "0, 0, 1", @"<Plane><Normal><X>0</X><Y>0</Y><Z>1</Z></Normal><RootPoint><X>0</X><Y>0</Y><Z>0</Z></RootPoint></Plane>")]
         public void PlaneDataContract(string rootPoint, string unitVector, string xml)
         {
@@ -75,7 +68,6 @@
             Assert.AreEqual(plane, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("1, 2, 3", "-1, 2, 3", false, @"<Ray3D><Direction><X>-0.2672612419124244</X><Y>0.53452248382484879</Y><Z>0.80178372573727319</Z></Direction><ThroughPoint><X>1</X><Y>2</Y><Z>3</Z></ThroughPoint></Ray3D>")]
         public void Ray3DDataContract(string ps, string vs, bool asElements, string xml)
         {
@@ -85,18 +77,6 @@
             AssertGeometry.AreEqual(ray, result, 1e-6);
         }
 
-        [Explicit("fix later")]
-        [TestCase("1, 2, 3", "4, 5, 6", @"<Line3D><EndPoint><X>4</X><Y>5</Y><Z>6</Z></EndPoint><StartPoint><X>1</X><Y>2</Y><Z>3</Z></StartPoint></Line3D>")]
-        public void Line3DDataContract(string p1s, string p2s, string xml)
-        {
-            Point3D p1 = Point3D.Parse(p1s);
-            Point3D p2 = Point3D.Parse(p2s);
-            var l = new Line3D(p1, p2);
-            var result = this.DataContractRoundTrip(l, xml);
-            Assert.AreEqual(l, result);
-        }
-
-        [Explicit("fix later")]
         [TestCase("1, 2, 3", "4, 5, 6", @"<LineSegment3D><EndPoint><X>4</X><Y>5</Y><Z>6</Z></EndPoint><StartPoint><X>1</X><Y>2</Y><Z>3</Z></StartPoint></LineSegment3D>")]
         public void LineSegment3DDataContract(string p1s, string p2s, string xml)
         {
@@ -107,18 +87,6 @@
             Assert.AreEqual(l, result);
         }
 
-        [Explicit("fix later")]
-        [TestCase("1, 2", "4, 5", @"<Line2D><EndPoint><X>4</X><Y>5</Y></EndPoint><StartPoint><X>1</X><Y>2</Y></StartPoint></Line2D>")]
-        public void Line2DDataContract(string p1s, string p2s, string xml)
-        {
-            Point2D p1 = Point2D.Parse(p1s);
-            Point2D p2 = Point2D.Parse(p2s);
-            var l = new Line2D(p1, p2);
-            var result = this.DataContractRoundTrip(l, xml);
-            Assert.AreEqual(l, result);
-        }
-
-        [Explicit("fix later")]
         [TestCase("1, 2", "4, 5", @"<LineSegement2D><EndPoint><X>4</X><Y>5</Y></EndPoint><StartPoint><X>1</X><Y>2</Y></StartPoint></LineSegement2D>")]
         public void LineSegment2DDataContract(string p1s, string p2s, string xml)
         {
@@ -129,7 +97,6 @@
             Assert.AreEqual(l, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Vector2DDataContract()
         {
@@ -139,7 +106,6 @@
             Assert.AreEqual(v, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Vector3DDataContract()
         {
@@ -149,7 +115,6 @@
             Assert.AreEqual(v, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("0, 0", 3)]
         public void Circle2DDataContract(string point, double radius)
         {
@@ -160,7 +125,6 @@
             Assert.AreEqual(c, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("0, 0, 0", 2.5)]
         public void Circle3DDataContract(string point, double radius)
         {
@@ -171,7 +135,6 @@
             Assert.AreEqual(c, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Polygon2DDataContract()
         {
@@ -182,7 +145,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void PolyLine2DDataContract()
         {
@@ -193,7 +155,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void PolyLine3DDataContract()
         {
@@ -204,11 +165,10 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void CoordinateSystemDataContract()
         {
-            var cs = new CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
+            var cs = new Euclidean.CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
             const string xml = @"
 <CoordinateSystem>
     <Origin><X>1</X><Y>-2</Y><Z>3</Z><Origin>
@@ -218,15 +178,6 @@
 </CoordinateSystem>";
             var result = this.DataContractRoundTrip(cs, xml);
             AssertGeometry.AreEqual(cs, result);
-        }
-
-        [Test]
-        public void DataContractRoundTripTest()
-        {
-            var dummy = new AssertXmlTests.XmlSerializableDummy("Meh", 14);
-            var roundTrip = this.DataContractRoundTrip(dummy, @"<AssertXmlTests.XmlSerializableDummy Age=""14""><Name>Meh</Name></AssertXmlTests.XmlSerializableDummy>");
-            Assert.AreEqual(dummy.Name, roundTrip.Name);
-            Assert.AreEqual(dummy.Age, roundTrip.Age);
         }
 
         private T DataContractRoundTrip<T>(T item, string expected)
@@ -252,6 +203,4 @@
             }
         }
     }
-
-#endif
 }

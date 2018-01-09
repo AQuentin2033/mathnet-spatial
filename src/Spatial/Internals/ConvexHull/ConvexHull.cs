@@ -4,7 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Threading.Tasks;
-    using MathNet.Spatial.Euclidean;
+    using MathNet.Spatial.Euclidean2D;
 
     /// <summary>
     /// An implementation of the work of Lui, Chen and Ouellet for solving the convex hull problem
@@ -40,7 +40,7 @@
         /// <summary>
         /// Initial list of points
         /// </summary>
-        private MutablePoint[] listOfPoint;
+        private Point2D[] listOfPoint;
 
         /// <summary>
         /// A value indicating if the graph needs closing
@@ -65,10 +65,10 @@
         /// <param name="initialResultGuessSize">An estimate for the initial size of the result set</param>
         public ConvexHull(IEnumerable<Point2D> listOfPoint, bool shouldCloseTheGraph = true, int initialResultGuessSize = 0)
         {
-            List<MutablePoint> l = new List<MutablePoint>();
+            List<Point2D> l = new List<Point2D>();
             foreach (var point in listOfPoint)
             {
-                MutablePoint p = new MutablePoint(point.X, point.Y);
+                Point2D p = new Point2D(point.X, point.Y);
                 l.Add(p);
             }
 
@@ -125,7 +125,7 @@
 
             if (this.q1.FirstPoint != this.q4.LastPoint)
             {
-                foreach (MutablePoint pt in this.q1)
+                foreach (Point2D pt in this.q1)
                 {
                     results[++resultIndex] = new Point2D(pt.X, pt.Y);
                 }
@@ -245,19 +245,19 @@
             this.q3.Prepare();
             this.q4.Prepare();
 
-            MutablePoint q1Root = this.q1.RootPoint;
-            MutablePoint q2Root = this.q2.RootPoint;
-            MutablePoint q3Root = this.q3.RootPoint;
-            MutablePoint q4Root = this.q4.RootPoint;
+            Point2D q1Root = this.q1.RootPoint;
+            Point2D q2Root = this.q2.RootPoint;
+            Point2D q3Root = this.q3.RootPoint;
+            Point2D q4Root = this.q4.RootPoint;
 
             // Main Loop to extract ConvexHullPoints
-            MutablePoint[] points = this.listOfPoint;
+            Point2D[] points = this.listOfPoint;
             int index = 0;
             int pointCount = points.Length;
 
             if (points != null)
             {
-                MutablePoint point;
+                Point2D point;
 
                 if (this.IsQuadrantAreDisjoint())
                 {
@@ -712,7 +712,7 @@
         /// <param name="pointToCheck">The point to check</param>
         /// <returns>True if the point is to rhe right of the other; Otherwise false</returns>
         //// [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsPointToTheRightOfOthers(MutablePoint p1, MutablePoint p2, MutablePoint pointToCheck)
+        internal static bool IsPointToTheRightOfOthers(Point2D p1, Point2D p2, Point2D pointToCheck)
         {
             return ((p2.X - p1.X) * (pointToCheck.Y - p1.Y)) - ((p2.Y - p1.Y) * (pointToCheck.X - p1.X)) < 0;
         }
@@ -722,7 +722,7 @@
         /// </summary>
         private void SetQuadrantLimitsOneThread()
         {
-            MutablePoint pointFirst = this.listOfPoint.First();
+            Point2D pointFirst = this.listOfPoint.First();
 
             // Find the quadrant limits (maximum x and y)
             double right, topLeft, topRight, left, bottomLeft, bottomRight;
@@ -731,7 +731,7 @@
             double top, rightTop, rightBottom, bottom, leftTop, leftBottom;
             top = rightTop = rightBottom = bottom = leftTop = leftBottom = pointFirst.Y;
 
-            foreach (MutablePoint pt in this.listOfPoint)
+            foreach (Point2D pt in this.listOfPoint)
             {
                 if (pt.X >= right)
                 {
@@ -825,21 +825,21 @@
                     }
                 }
 
-                this.q1.FirstPoint = new MutablePoint(right, rightTop);
-                this.q1.LastPoint = new MutablePoint(topRight, top);
-                this.q1.RootPoint = new MutablePoint(topRight, rightTop);
+                this.q1.FirstPoint = new Point2D(right, rightTop);
+                this.q1.LastPoint = new Point2D(topRight, top);
+                this.q1.RootPoint = new Point2D(topRight, rightTop);
 
-                this.q2.FirstPoint = new MutablePoint(topLeft, top);
-                this.q2.LastPoint = new MutablePoint(left, leftTop);
-                this.q2.RootPoint = new MutablePoint(topLeft, leftTop);
+                this.q2.FirstPoint = new Point2D(topLeft, top);
+                this.q2.LastPoint = new Point2D(left, leftTop);
+                this.q2.RootPoint = new Point2D(topLeft, leftTop);
 
-                this.q3.FirstPoint = new MutablePoint(left, leftBottom);
-                this.q3.LastPoint = new MutablePoint(bottomLeft, bottom);
-                this.q3.RootPoint = new MutablePoint(bottomLeft, leftBottom);
+                this.q3.FirstPoint = new Point2D(left, leftBottom);
+                this.q3.LastPoint = new Point2D(bottomLeft, bottom);
+                this.q3.RootPoint = new Point2D(bottomLeft, leftBottom);
 
-                this.q4.FirstPoint = new MutablePoint(bottomRight, bottom);
-                this.q4.LastPoint = new MutablePoint(right, rightBottom);
-                this.q4.RootPoint = new MutablePoint(bottomRight, rightBottom);
+                this.q4.FirstPoint = new Point2D(bottomRight, bottom);
+                this.q4.LastPoint = new Point2D(right, rightBottom);
+                this.q4.RootPoint = new Point2D(bottomRight, rightBottom);
             }
         }
 
@@ -891,11 +891,11 @@
         /// <param name="offset">the offset</param>
         /// <param name="limit">the limit</param>
         /// <returns>A limit</returns>
-        private Limit FindLimits(MutablePoint[] listOfPoint, int start, int offset, Limit limit)
+        private Limit FindLimits(Point2D[] listOfPoint, int start, int offset, Limit limit)
         {
             for (int index = start; index < listOfPoint.Length; index += offset)
             {
-                MutablePoint pt = listOfPoint[index];
+                Point2D pt = listOfPoint[index];
 
                 double x = pt.X;
                 double y = pt.Y;
@@ -1094,7 +1094,7 @@
         /// <param name="point">a point</param>
         /// <param name="limit">a limit</param>
         /// <returns>The found limit</returns>
-        private Limit FindLimits(MutablePoint point, Limit limit)
+        private Limit FindLimits(Point2D point, Limit limit)
         {
             double x = point.X;
             double y = point.Y;
@@ -1459,7 +1459,7 @@
         /// </summary>
         /// <param name="listOfPoint">a list of points</param>
         /// <param name="shouldCloseTheGraph">a bool indicating if the graph should be closed</param>
-        private void Init(MutablePoint[] listOfPoint, bool shouldCloseTheGraph)
+        private void Init(Point2D[] listOfPoint, bool shouldCloseTheGraph)
         {
             this.listOfPoint = listOfPoint;
             this.shouldCloseTheGraph = shouldCloseTheGraph;
@@ -1473,20 +1473,20 @@
         [SuppressMessage("Microsoft.StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Simple struct clearly named")]
         private struct Limit
         {
-            internal MutablePoint Q1Top;
-            internal MutablePoint Q2Top;
-            internal MutablePoint Q2Left;
-            internal MutablePoint Q3Left;
-            internal MutablePoint Q3Bottom;
-            internal MutablePoint Q4Bottom;
-            internal MutablePoint Q4Right;
-            internal MutablePoint Q1Right;
+            internal Point2D Q1Top;
+            internal Point2D Q2Top;
+            internal Point2D Q2Left;
+            internal Point2D Q3Left;
+            internal Point2D Q3Bottom;
+            internal Point2D Q4Bottom;
+            internal Point2D Q4Right;
+            internal Point2D Q1Right;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Limit"/> struct.
             /// </summary>
             /// <param name="point">a point</param>
-            internal Limit(MutablePoint point)
+            internal Limit(Point2D point)
             {
                 this.Q1Top = point;
                 this.Q2Top = point;

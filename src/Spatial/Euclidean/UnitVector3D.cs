@@ -5,18 +5,14 @@ namespace MathNet.Spatial.Euclidean
     using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
     using MathNet.Numerics.LinearAlgebra;
+    using MathNet.Spatial;
     using MathNet.Spatial.Internals;
-    using MathNet.Spatial.Units;
 
     /// <summary>
     /// A unit vector, this is used to describe a direction in 3D
     /// </summary>
-    [Serializable]
-    public struct UnitVector3D : IXmlSerializable, IEquatable<UnitVector3D>, IEquatable<Vector3D>, IFormattable
+    public struct UnitVector3D : IEquatable<UnitVector3D>, IEquatable<Vector3D>, IFormattable
     {
         /// <summary>
         /// The x component.
@@ -432,16 +428,6 @@ namespace MathNet.Spatial.Euclidean
         }
 
         /// <summary>
-        /// Creates an <see cref="UnitVector3D"/> from an <see cref="XmlReader"/>.
-        /// </summary>
-        /// <param name="reader">An <see cref="XmlReader"/> positioned at the node to read into this <see cref="UnitVector3D"/>.</param>
-        /// <returns>An <see cref="UnitVector3D"/> that contains the data read from the reader.</returns>
-        public static UnitVector3D ReadFrom(XmlReader reader)
-        {
-            return reader.ReadElementAs<UnitVector3D>();
-        }
-
-        /// <summary>
         /// Scale this instance by <paramref name="factor"/>
         /// </summary>
         /// <param name="factor">The plane to project on.</param>
@@ -744,22 +730,6 @@ namespace MathNet.Spatial.Euclidean
         /// </summary>
         /// <param name="about">The vector to rotate around.</param>
         /// <param name="angle">The angle positive according to right hand rule.</param>
-        /// <param name="unit">The <see cref="IAngleUnit"/></param>
-        /// <typeparam name="T">any angle type</typeparam>
-        /// <returns>A rotated vector.</returns>
-        [Pure]
-        [Obsolete("This method will be removed, prefer the overload taking an Angle. Made obsolete 2017-12-05.")]
-        public UnitVector3D Rotate<T>(UnitVector3D about, double angle, T unit)
-            where T : IAngleUnit
-        {
-            return this.Rotate(about, Angle.From(angle, unit));
-        }
-
-        /// <summary>
-        /// Returns a vector that is this vector rotated the signed angle around the about vector
-        /// </summary>
-        /// <param name="about">The vector to rotate around.</param>
-        /// <param name="angle">The angle positive according to right hand rule.</param>
         /// <returns>A rotated vector.</returns>
         [Pure]
         public UnitVector3D Rotate(UnitVector3D about, Angle angle)
@@ -929,57 +899,6 @@ namespace MathNet.Spatial.Euclidean
                 hashCode = (hashCode * 397) ^ this.Z.GetHashCode();
                 return hashCode;
             }
-        }
-
-        /// <inheritdoc />
-        XmlSchema IXmlSerializable.GetSchema()
-        {
-            return null;
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            bool TryGetUnitVector(double xv, double yv, double zv, out UnitVector3D result)
-            {
-                var temp = new Vector3D(xv, yv, zv);
-                if (Math.Abs(temp.Length - 1) < 1E-3)
-                {
-                    result = temp.Normalize();
-                    return true;
-                }
-
-                result = default(UnitVector3D);
-                return false;
-            }
-
-            if (reader.TryReadAttributeAsDouble("X", out var x) &&
-                reader.TryReadAttributeAsDouble("Y", out var y) &&
-                reader.TryReadAttributeAsDouble("Z", out var z) &&
-                TryGetUnitVector(x, y, z, out var uv))
-            {
-                reader.Skip();
-                this = uv;
-                return;
-            }
-
-            if (reader.TryReadChildElementsAsDoubles("X", "Y", "Z", out x, out y, out z) &&
-                TryGetUnitVector(x, y, z, out uv))
-            {
-                reader.Skip();
-                this = uv;
-                return;
-            }
-
-            throw new XmlException($"Could not read a {this.GetType()}");
-        }
-
-        /// <inheritdoc />
-        void IXmlSerializable.WriteXml(XmlWriter writer)
-        {
-            writer.WriteAttribute("X", this.X);
-            writer.WriteAttribute("Y", this.Y);
-            writer.WriteAttribute("Z", this.Z);
         }
 
         /// <summary>

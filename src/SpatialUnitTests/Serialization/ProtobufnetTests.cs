@@ -2,8 +2,9 @@
 {
     using System.IO;
     using System.Linq;
+    using MathNet.Spatial;
     using MathNet.Spatial.Euclidean;
-    using MathNet.Spatial.Units;
+    using MathNet.Spatial.Euclidean2D;
     using MathNet.Spatial.UnitTests;
     using NUnit.Framework;
 
@@ -13,11 +14,9 @@
 
         public ProtobufNetTests()
         {
-            // ReSharper disable once UnusedVariable
             var model = ProtoBuf.Meta.RuntimeTypeModel.Default;
         }
 
-        [Explicit("fix later")]
         [TestCase("15 °")]
         public void AngleProtoBuf(string vs)
         {
@@ -42,7 +41,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void QuaternionProtoBuf()
         {
@@ -51,7 +49,6 @@
             Assert.AreEqual(q, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void EulerAnglesProtoBuf()
         {
@@ -61,7 +58,6 @@
             Assert.AreEqual(eulerAngles, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("0, 0, 0", "0, 0, 1")]
         public void PlaneProtoBuf(string rootPoint, string unitVector)
         {
@@ -70,7 +66,6 @@
             Assert.AreEqual(plane, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("1, 2, 3", "-1, 2, 3", false)]
         public void Ray3DProtoBuf(string ps, string vs, bool asElements)
         {
@@ -80,29 +75,6 @@
             AssertGeometry.AreEqual(ray, result, 1e-6);
         }
 
-        [Explicit("fix later")]
-        [TestCase("1, 2, 3", "4, 5, 6")]
-        public void Line3DProtoBuf(string p1s, string p2s)
-        {
-            Point3D p1 = Point3D.Parse(p1s);
-            Point3D p2 = Point3D.Parse(p2s);
-            var l = new Line3D(p1, p2);
-            var result = this.ProtobufRoundTrip(l);
-            Assert.AreEqual(l, result);
-        }
-
-        [Explicit("fix later")]
-        [TestCase("1, 2", "4, 5")]
-        public void Line2DProtoBuf(string p1s, string p2s)
-        {
-            Point2D p1 = Point2D.Parse(p1s);
-            Point2D p2 = Point2D.Parse(p2s);
-            var l = new Line2D(p1, p2);
-            var result = this.ProtobufRoundTrip(l);
-            Assert.AreEqual(l, result);
-        }
-
-        [Explicit("fix later")]
         [TestCase("1, 2, 3", "4, 5, 6")]
         public void LineSegment3DProtoBuf(string p1s, string p2s)
         {
@@ -113,7 +85,6 @@
             Assert.AreEqual(l, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("1, 2", "4, 5")]
         public void LineSegment2DProtoBuf(string p1s, string p2s)
         {
@@ -124,7 +95,6 @@
             Assert.AreEqual(l, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Vector2DProtoBuf()
         {
@@ -133,7 +103,6 @@
             Assert.AreEqual(v, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Vector3DProtoBuf()
         {
@@ -142,7 +111,6 @@
             Assert.AreEqual(v, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("0, 0", 3)]
         public void Circle2DProtoBuf(string point, double radius)
         {
@@ -152,7 +120,6 @@
             Assert.AreEqual(c, result);
         }
 
-        [Explicit("fix later")]
         [TestCase("0, 0, 0", 2.5)]
         public void Circle3DProtoBuf(string point, double radius)
         {
@@ -162,7 +129,6 @@
             Assert.AreEqual(c, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void Polygon2DProtoBuf()
         {
@@ -172,7 +138,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void PolyLine2DProtoBuf()
         {
@@ -182,7 +147,6 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void PolyLine3DProtoBuf()
         {
@@ -192,11 +156,10 @@
             Assert.AreEqual(p, result);
         }
 
-        [Explicit("fix later")]
         [Test]
         public void CoordinateSystemProtoBuf()
         {
-            var cs = new CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
+            var cs = new Euclidean.CoordinateSystem(new Point3D(1, -2, 3), new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), new Vector3D(1, 0, 0));
             var result = this.ProtobufRoundTrip(cs);
             AssertGeometry.AreEqual(cs, result);
         }
