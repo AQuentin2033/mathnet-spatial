@@ -18,7 +18,7 @@
             double x = info.GetDouble("x");
             double y = info.GetDouble("y");
             double z = info.GetDouble("z");
-            return new UnitVector3D(x, y, z);
+            return UnitVector3D.Create(x, y, z);
         }
     }
 }

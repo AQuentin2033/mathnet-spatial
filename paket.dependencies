@@ -7,7 +7,7 @@ group Build
 
 group MathNet
     source https://www.nuget.org/api/v2
-    nuget MathNet.Numerics ~> 4.0.0-alpha02
+    nuget MathNet.Numerics ~> 4.0.0-beta03
     nuget MathNet.Numerics.Signed ~> 3.8
 
 group Analyzers
@@ -25,7 +25,7 @@ group Benchmarks
     source https://www.nuget.org/api/v2
     nuget NUnit ~> 3.8
     nuget BenchmarkDotNet.Diagnostics.Windows
-    nuget MathNet.Numerics ~> 3.8
+    nuget MathNet.Numerics ~> 4.0.0-beta03
 
 group Roslyn
     storage: none

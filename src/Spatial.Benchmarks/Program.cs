@@ -18,6 +18,9 @@ namespace Spatial.Benchmarks
         {
             var config = new SpatialConfig();
 
+            var t = RunSingle<Vector2DBenchmarks>(config);
+            return;
+
             if (args.Length > 0)
             {
                 RunAll(config, args);
@@ -42,9 +45,9 @@ namespace Spatial.Benchmarks
             return summaries;
         }
 
-        private static IEnumerable<Summary> RunSingle<T>()
+        private static IEnumerable<Summary> RunSingle<T>(IConfig config)
         {
-            var summaries = new[] { BenchmarkRunner.Run<T>() };
+            var summaries = new[] { BenchmarkRunner.Run<T>(config) };
             return summaries;
         }
     }

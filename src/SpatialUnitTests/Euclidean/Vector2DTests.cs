@@ -2,7 +2,6 @@
 namespace MathNet.Spatial.UnitTests.Euclidean
 {
     using System;
-    using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial;
     using MathNet.Spatial.Euclidean2D;
     using NUnit.Framework;
@@ -13,6 +12,7 @@ namespace MathNet.Spatial.UnitTests.Euclidean
         public void Ctor()
         {
             var v = new Vector2D(1, 2);
+            var v2 = new Vector2D(1, 2);
             Assert.AreEqual(1, v.X);
             Assert.AreEqual(2, v.Y);
         }

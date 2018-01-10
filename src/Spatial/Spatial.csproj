@@ -55,12 +55,14 @@
       <HintPath>..\..\packages\mathnet\MathNet.Numerics\lib\net40\MathNet.Numerics.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework.Contains('netcoreapp2.0')) OR $(TargetFramework.Contains('netstandard2.0'))">
     <Reference Include="MathNet.Numerics">
       <HintPath>..\..\packages\mathnet\MathNet.Numerics\lib\netstandard2.0\MathNet.Numerics.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Spatial.ruleset" />
@@ -89,12 +91,6 @@
       <HintPath>..\..\packages\mathnet\MathNet.Numerics\lib\netstandard1.3\MathNet.Numerics.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Units\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\out\lib-debug\</OutputPath>

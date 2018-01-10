@@ -12,22 +12,27 @@
     using BenchmarkDotNet.Jobs;
     using BenchmarkDotNet.Loggers;
     using BenchmarkDotNet.Toolchains.CsProj;
+    using BenchmarkDotNet.Validators;
 
     internal class SpatialConfig : ManualConfig
     {
         public SpatialConfig()
         {
+            Add(JitOptimizationsValidator.DontFailOnError); // ALLOW NON-OPTIMIZED DLLS
+
             this.Add(DefaultConfig.Instance.GetLoggers().ToArray());
             this.Add(DefaultConfig.Instance.GetValidators().ToArray());
             this.Add(DefaultConfig.Instance.GetHardwareCounters().ToArray());
             this.Add(DefaultConfig.Instance.GetDiagnosers().ToArray());
             this.Add(DefaultConfig.Instance.GetColumnProviders().ToArray());
             this.Add(MarkdownExporter.GitHub);
+            
 #if NET47 == true
             this.Add(Job.Default
                 .With(Platform.X86)
                 .With(Jit.LegacyJit)
                 .With(Runtime.Clr));
+            /*
             this.Add(Job.Default
                 .With(Platform.X64)
                 .With(Jit.LegacyJit)
@@ -36,12 +41,16 @@
                 .With(Platform.X64)
                 .With(Jit.RyuJit)
                 .With(Runtime.Clr));
+                */
 #endif
+
 #if NETCOREAPP2_0 == true
+            /*
             this.Add(Job.Default
                 .With(Platform.X64)
                 .With(Jit.RyuJit)
                 .With(Runtime.Core));
+            */
 #endif
         }
     }

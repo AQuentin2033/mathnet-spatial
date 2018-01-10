@@ -36,8 +36,7 @@ namespace MathNet.Spatial.Euclidean
         /// <param name="x">The x component.</param>
         /// <param name="y">The y component.</param>
         /// <param name="z">The z component.</param>
-        [Obsolete("This constructor will be made private, prefer the factory method Create. Made obsolete 2017-12-05.")]
-        public UnitVector3D(double x, double y, double z)
+        private UnitVector3D(double x, double y, double z)
         {
             if (double.IsNaN(x) || double.IsInfinity(x))
             {
