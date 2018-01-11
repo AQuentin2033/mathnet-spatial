@@ -112,7 +112,8 @@
                 if (cumulativeLength <= lengthFromStart && nextLength > lengthFromStart)
                 {
                     var leftover = lengthFromStart - cumulativeLength;
-                    var direction = this[i].VectorTo(this[i + 1]).Normalize();
+                    var direction = this[i].VectorTo(this[i + 1]);
+                    direction.Normalize();
                     return this[i] + (direction * leftover);
                 }
                 else

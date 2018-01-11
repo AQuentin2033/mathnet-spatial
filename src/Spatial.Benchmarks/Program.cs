@@ -18,9 +18,7 @@ namespace Spatial.Benchmarks
         {
             var config = new SpatialConfig();
 
-            var t = RunSingle<Vector2DBenchmarks>(config);
-            return;
-
+            // args = new string[] { "Vector2DBenchmarks", "Vector2DOldBenchmarks" };
             if (args.Length > 0)
             {
                 RunAll(config, args);

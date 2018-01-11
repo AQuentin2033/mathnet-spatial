@@ -129,7 +129,15 @@
         /// <summary>
         /// Gets a normalized vector in the direction from <see cref="StartPoint"/> to <see cref="EndPoint"/>
         /// </summary>
-        public Vector2D Direction => this.StartPoint.VectorTo(this.EndPoint).Normalize();
+        public Vector2D Direction
+        {
+            get
+            {
+                var v = this.StartPoint.VectorTo(this.EndPoint);
+                v.Normalize();
+                return v;
+            }
+        }
 
         /// <inheritdoc />
         public object Tag { get; set; }
@@ -184,9 +192,9 @@
         /// <returns>A new translated linesegment</returns>
         public LineSegment2D TranslateBy(Vector2D vector)
         {
-            var startVector = this.StartPoint.ToVector2D().Add(vector);
-            var endVector = this.EndPoint.ToVector2D().Add(vector);
-            return new LineSegment2D(new Point2D(startVector.X, startVector.Y), new Point2D(endVector.X, endVector.Y));
+            this.StartPoint.ToVector2D().Add(vector);
+            this.EndPoint.ToVector2D().Add(vector);
+            return this;
         }
 
         /// <summary>

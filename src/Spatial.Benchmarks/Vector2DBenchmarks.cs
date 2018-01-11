@@ -103,7 +103,8 @@
         [Benchmark]
         public Vector2D Rotate()
         {
-            return P1.Rotate(Angle.FromRadians(2));
+            P1.Rotate(Angle.FromRadians(2));
+            return P1;
         }
 
         [Benchmark]
@@ -127,13 +128,15 @@
         [Benchmark]
         public Vector2D Normalize()
         {
-            return P1.Normalize();
+            P1.Normalize();
+            return P1;
         }
 
         [Benchmark]
         public Vector2D ScaleBy()
         {
-            return P1.ScaleBy(2);
+            P1.ScaleBy(2);
+            return P1;
         }
 
         [Benchmark]
@@ -145,13 +148,15 @@
         [Benchmark]
         public Vector2D Subtract()
         {
-            return P1.Subtract(P2);
+            P1.Subtract(P2);
+            return P1;
         }
 
         [Benchmark]
         public Vector2D Add()
         {
-            return P1.Add(P2);
+            P1.Add(P2);
+            return P1;
         }
 
         [Benchmark]

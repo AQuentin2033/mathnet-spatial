@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net471</TargetFrameworks>
+    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>
     <AssemblyName>Spatial.Benchmarks</AssemblyName>
     <RootNamespace>Spatial.Benchmarks</RootNamespace>
     <CodeAnalysisRuleSet>Spatial.Benchmarks.ruleset</CodeAnalysisRuleSet>

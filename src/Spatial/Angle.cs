@@ -2,13 +2,29 @@ namespace MathNet.Spatial
 {
     using System;
     using System.Globalization;
+    using System.Runtime.CompilerServices;
     using MathNet.Spatial.Internals;
 
     /// <summary>
     /// An angle
     /// </summary>
-    public struct Angle : IComparable<Angle>, IEquatable<Angle>, IFormattable
+    public readonly struct Angle : IComparable<Angle>, IFormattable
     {
+        /// <summary>
+        /// An Angle of Math.PI or 180 Degrees
+        /// </summary>
+        public static readonly Angle PI = new Angle(Math.PI);
+
+        /// <summary>
+        /// An Angle of Math.PI * 2 or 360 Degrees
+        /// </summary>
+        public static readonly Angle TwoPI = new Angle(Math.PI * 2);
+
+        /// <summary>
+        /// An Angle of Math.PI / 2 or 90 Degrees
+        /// </summary>
+        public static readonly Angle PIOverTwo = new Angle(Math.PI / 2);
+
         /// <summary>
         /// The value in radians
         /// </summary>
@@ -64,6 +80,7 @@ namespace MathNet.Spatial
         /// <param name="left">The first angle to compare</param>
         /// <param name="right">The second angle to compare</param>
         /// <returns>True if the angles are the same; otherwise false.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Angle left, Angle right)
         {
             return left.Equals(right);
@@ -75,9 +92,10 @@ namespace MathNet.Spatial
         /// <param name="left">The first angle to compare</param>
         /// <param name="right">The second angle to compare</param>
         /// <returns>True if the angles are different; otherwise false.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Angle left, Angle right)
         {
-            return !left.Equals(right);
+            return !(left == right);
         }
 
         /// <summary>
@@ -187,17 +205,6 @@ namespace MathNet.Spatial
         public static Angle operator -(Angle angle)
         {
             return new Angle(-1 * angle.Radians);
-        }
-
-        /// <summary>
-        /// No function.
-        /// </summary>
-        /// <param name="angle">An angle</param>
-        /// <returns>The angle passed</returns>
-        [Obsolete("Unnecessary, made obsolete on 2017-12-07")]
-        public static Angle operator +(Angle angle)
-        {
-            return angle;
         }
 
         /// <summary>
@@ -318,13 +325,6 @@ namespace MathNet.Spatial
             return this.Radians.CompareTo(value.Radians);
         }
 
-        /// <inheritdoc />
-        public bool Equals(Angle other)
-        {
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            return this.Radians == other.Radians;
-        }
-
         /// <summary>
         /// Returns a value indicating whether this instance is equal to a specified <see cref="T:MathNet.Spatial.Units.Angle"/> object within the given tolerance.
         /// </summary>
@@ -351,15 +351,22 @@ namespace MathNet.Spatial
             return Math.Abs(this.Radians - other.Radians) < tolerance.Radians;
         }
 
-        /// <inheritdoc />
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Returns the sin of the angle
+        /// </summary>
+        /// <returns>The sin of the angle</returns>
+        public double Sin()
         {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
+            return Math.Sin(this.Radians);
+        }
 
-            return obj is Angle angle && this.Equals(angle);
+        /// <summary>
+        /// Returns the cos of the angle
+        /// </summary>
+        /// <returns>The sin of the angle</returns>
+        public double Cos()
+        {
+            return Math.Cos(this.Radians);
         }
 
         /// <inheritdoc />

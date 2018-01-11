@@ -124,8 +124,8 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             var v1 = Vector2D.Parse(v1s);
             var v2 = Vector2D.Parse(v2s);
             var expected = Vector2D.Parse(evs);
-            Assert.AreEqual(expected, v1.Add(v2));
-            Assert.AreEqual(expected, v2.Add(v1));
+            v1.Add(v2);
+            Assert.AreEqual(expected, v1);
         }
 
         [TestCase("-1, -2", "1, 2", "-2, -4")]
@@ -134,7 +134,8 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             var v1 = Vector2D.Parse(v1s);
             var v2 = Vector2D.Parse(v2s);
             var expected = Vector2D.Parse(evs);
-            Assert.AreEqual(expected, v1.Subtract(v2));
+            v1.Subtract(v2);
+            Assert.AreEqual(expected, v1);
         }
 
         [TestCase("-1, -2", "1, 2")]
@@ -149,7 +150,8 @@ namespace MathNet.Spatial.UnitTests.Euclidean
         public void ScaleBy(string vs, double d, string evs)
         {
             var v = Vector2D.Parse(vs);
-            Assert.AreEqual(Vector2D.Parse(evs), v.ScaleBy(d));
+            v.ScaleBy(d);
+            Assert.AreEqual(Vector2D.Parse(evs), v);
         }
 
         [TestCase("2, 0", 2)]
@@ -226,7 +228,8 @@ namespace MathNet.Spatial.UnitTests.Euclidean
             var v = Vector2D.Parse(vs);
             var angle = Angle.Parse(@as);
             var expected = Vector2D.Parse(evs);
-            AssertGeometry.AreEqual(expected, v.Rotate(angle), 0.01);
+            v.Rotate(angle);
+            AssertGeometry.AreEqual(expected, v, 0.01);
         }
 
         [TestCase("1, 2", "3, 4", 11)]
@@ -242,7 +245,8 @@ namespace MathNet.Spatial.UnitTests.Euclidean
         {
             var v1 = Vector2D.Parse(vs);
             var expected = Vector2D.Parse(evs);
-            AssertGeometry.AreEqual(expected, v1.Normalize());
+            v1.Normalize();
+            AssertGeometry.AreEqual(expected, v1);
         }
 
         [TestCase("1,0", "0,1", "270°", "-90°")]

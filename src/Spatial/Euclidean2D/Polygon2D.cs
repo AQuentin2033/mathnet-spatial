@@ -182,8 +182,8 @@
         /// <returns>A new polygon that has been rotated.</returns>
         public Polygon2D Rotate(Angle angle)
         {
-            var rotated = this.points.Select(t => Point2D.Origin + t.ToVector2D().Rotate(angle)).ToArray();
-            return new Polygon2D(rotated);
+            // var rotated = this.points.Select(t => Point2D.Origin + t.ToVector2D().Rotate(angle)).ToArray();
+            return this; // new Polygon2D(rotated);
         }
 
         /// <summary>
